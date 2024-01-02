@@ -1,11 +1,6 @@
 const { DataTypes } = require("sequelize");
 const db = require("../db");
 
-//Email
-//Pass
-//Username
-//Role
-
 const User = db.define("user", {
   username: {
     type: DataTypes.STRING,
@@ -25,4 +20,4 @@ const User = db.define("user", {
   },
 });
 
-module.exports = { User };
+module.exports = User;
