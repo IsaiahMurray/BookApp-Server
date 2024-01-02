@@ -1,8 +1,9 @@
 const { DataTypes } = require('sequelize');
 const db = require('../db');
+const UserModel = require('./user'); 
 
 
-const Book = db.define('book', {
+const BookModel = db.define('book', {
     author: {
         type: DataTypes.STRING,
         allowNull: false
@@ -45,7 +46,7 @@ const Book = db.define('book', {
     }
 });
 
-const Chapter = db.define('chapter', {
+const ChapterModel = db.define('chapter', {
     bookId: {
         type: DataTypes.NUMBER,
         allowNull: false
@@ -64,11 +65,16 @@ const Chapter = db.define('chapter', {
     }
 });
 
-const Tag = db.define('tag', {
+const TagModel = db.define('tag', {
     tagName: {
         type: DataTypes.STRING,
         allowNull: false
     }
 });
 
-module.exports = {Book, Chapter, Tag};
+BookModel.belongsTo(UserModel, { foreignKey: 'userId' });
+ChapterModel.belongsTo(BookModel, { foreignKey: 'bookId' });
+BookModel.belongsToMany(TagModel, { through: 'BookTags' });
+TagModel.belongsToMany(BookModel, { through: 'BookTags' });
+
+module.exports = {BookModel, ChapterModel, TagModel};
