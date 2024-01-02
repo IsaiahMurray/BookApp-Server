@@ -1,5 +1,6 @@
 require("dotenv").config();
 const chalk = require("chalk");
+const helmet = require('helmet');
 
 const Express = require("express");
 const app = Express();
@@ -9,6 +10,7 @@ const dbConnection = require("./db");
 const middlewares = require("./middleware");
 const controllers = require("./controllers");
 
+app.use(helmet());
 app.use("/user", controllers.UserController);
 
 dbConnection
