@@ -12,6 +12,21 @@ NPM Packages
 -node
 -express
 -jsonwebtoken
+-chalk
+-axios
+<!-- -knex -->
+-sequelize
+-passport
+-body-parser
+-morgan
+<!-- -lodash -->
+<!-- -moment -->
+-helmet
+-bcryptjs
+-pg
+-pg-hstore
+-dotenv
+
 
 NPM Dev Packages
--
+-mocha
