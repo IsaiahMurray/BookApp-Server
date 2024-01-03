@@ -1,5 +1,4 @@
 require("dotenv").config();
-const chalk = require("chalk");
 const helmet = require('helmet');
 
 const Express = require("express");
@@ -20,7 +19,7 @@ dbConnection
   })
   .then(() => {
     app.listen(process.env.PORT, () => {
-      console.log(chalk.yellowBright(`[Server: ] App is listening on Port ${process.env.PORT}`));
+      console.log(`[Server: ] App is listening on Port ${process.env.PORT}`);
     });
   })
   .catch((err) => {
