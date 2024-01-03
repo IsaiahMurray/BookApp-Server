@@ -9,6 +9,9 @@ const UserModel = db.define("user", {
   email: {
     type: DataTypes.STRING,
     allowNull: false,
+    validate: {
+      isEmail: true,
+    }
   },
   password: {
     type: DataTypes.STRING,
