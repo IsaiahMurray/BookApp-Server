@@ -1,7 +1,5 @@
 const { DataTypes } = require('sequelize');
 const db = require('../db');
-const UserModel = require('./user'); 
-
 
 const BookModel = db.define('book', {
     author: {
@@ -41,7 +39,7 @@ const BookModel = db.define('book', {
         allowNull: true
     },
     tags: {
-        type: DataTypes.ARRAY(DataTypes.NUMBER),
+        type: DataTypes.ARRAY(DataTypes.INTEGER),
         allowNull: true
     },
     canReview: {

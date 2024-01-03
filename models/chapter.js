@@ -3,7 +3,7 @@ const db = require('../db');
 
 const ChapterModel = db.define('chapter', {
     bookId: {
-        type: DataTypes.NUMBER,
+        type: DataTypes.INTEGER,
         allowNull: false
     },
     title: {
@@ -15,7 +15,7 @@ const ChapterModel = db.define('chapter', {
         allowNull: false
     },
     chapterNumber: {
-        type: DataTypes.NUMBER,
+        type: DataTypes.INTEGER,
         allowNull: false
     }
 });
