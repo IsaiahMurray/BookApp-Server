@@ -3,9 +3,6 @@
 //! Patch email/username
 //! Update password
 //! User delete
-//! Upload pic
-//! Get pic
-//! Delete pic
 
 const Services = require("../services/index");
 const UserController = require("express").Router();
@@ -95,12 +92,114 @@ const {
   });
 
 //! Patch email/username
+UserController.route("/update/username").put(ValidateSession, async (req, res) => {
+  try {
+    const { username } = req.body;
+    const { id } = req.user;
 
+    const updatedUserName = await Services.UserService.modifyName(
+      id,
+      username
+    );
+    res.json({
+      user: updatedUserName,
+      info: {
+        message: UPDATE_SUCCESS,
+      },
+    });
+  } catch (e) {
+    if (e instanceof Error) {
+      const errorMessage = {
+        title: UPDATE_FAIL,
+        info: {
+          message: e.message,
+        },
+      };
+      res.send(errorMessage);
+    }
+  }
+});
+
+//! Update email
+UserController.route("/update/email").put(ValidateSession, async (req, res) => {
+  try {
+    const { email } = req.body;
+    const { id } = req.user;
+
+    const updatedUserEmail = await Services.UserService.modifyEmail(id, email);
+    res.json({
+      user: updatedUserEmail,
+      info: {
+        message: UPDATE_SUCCESS,
+      },
+    });
+  } catch (e) {
+    if (e instanceof Error) {
+      const errorMessage = {
+        title: UPDATE_FAIL,
+        info: {
+          message: e.message,
+        },
+      };
+      res.send(errorMessage);
+    }
+  }
+});
 
 //! Update password
+UserController
+  .route("/update/password")
+  .put(ValidateSession, async (req, res) => {
+    try {
+      const { password } = req.body;
+      const { id } = req.user;
+      const hashedPassword = await Services.PasswordService.hashPassword(password);
+      const updatedUserPass = await Services.UserService.modifyPassword(
+        id,
+        hashedPassword
+      );
+      res.json({
+        user: updatedUserPass,
+        info: {
+          message: UPDATE_SUCCESS,
+        },
+      });
+    } catch (e) {
+      if (e instanceof Error) {
+        const errorMessage = {
+          title: UPDATE_FAIL,
+          info: {
+            message: e.message,
+          },
+        };
+        res.send(errorMessage);
+      }
+    }
+  });
+
 //! User delete
-//! Upload pic
-//! Get pic
-//! Delete pic
+UserController.route("/delete").delete(ValidateSession, async (req, res) => {
+  try {
+    const { id } = req.user;
+    const destroyedUser = await Services.UserService.remove(id);
+
+    res.status(200).json({
+      destroyedUser,
+      info: {
+        message: DELETE_SUCCESS,
+      },
+    });
+  } catch (e) {
+    if (e instanceof Error) {
+      const errorMessage = {
+        title: DELETE_FAIL,
+        info: {
+          message: e.message,
+        },
+      };
+      res.send(errorMessage);
+    }
+  }
+});
   
   module.exports = UserController;
