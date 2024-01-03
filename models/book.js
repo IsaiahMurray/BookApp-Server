@@ -47,7 +47,11 @@ const BookModel = db.define('book', {
     canReview: {
         type: DataTypes.BOOLEAN,
         allowNull: false,
-    },
+    }, 
+    profilePicture: {
+        type: DataTypes.STRING, // Store the path or URL of the profile picture
+        allowNull: true, // Allow the profile picture to be optional
+      },
     
 });
 
