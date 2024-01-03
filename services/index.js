@@ -5,5 +5,6 @@ module.exports = {
     BookService: require('./bookService'),
     ChapterService: require('./chapterService'),
     TagService: require('./tagService'),
-    ReviewService: require('./reviewService')
+    ReviewService: require('./reviewService'),
+    JWTService: require('./jwtService'),
 };
