@@ -11,7 +11,7 @@ const UserModel = db.define("user", {
     allowNull: false,
     validate: {
       isEmail: true,
-    }
+    },
   },
   password: {
     type: DataTypes.STRING,
