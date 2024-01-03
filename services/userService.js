@@ -1,4 +1,3 @@
-const chalk = require("chalk");
 const { UserModel } = require("../models");
 
 //? Register User
@@ -8,7 +7,7 @@ const create = async ({ username, email, password }) => {
       username,
       email,
       password,
-      role: "user",
+      role: "User",
     });
 
     return newUser;
