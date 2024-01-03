@@ -1,9 +1,9 @@
 module.exports = {
-    admin: require('./adminService'),
-    user: require('./userService'),
-    password: require('./passwordService'),
-    book: require('./bookService'),
-    chapterService: require('./chapterService'),
-    tag: require('./tagService'),
-    review: require('./reviewService')
+    AdminService: require('./adminService'),
+    UserService: require('./userService'),
+    PasswordService: require('./passwordService'),
+    BookService: require('./bookService'),
+    ChapterService: require('./chapterService'),
+    TagService: require('./tagService'),
+    ReviewService: require('./reviewService')
 };
