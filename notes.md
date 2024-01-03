@@ -26,10 +26,12 @@ NPM Packages
 -pg
 -pg-hstore
 -dotenv
+-multer
+-CASL
 
 
 NPM Dev Packages
 -mocha
+https://blog.logrocket.com/multer-nodejs-express-upload-file/#managing-user-inputs
 
-
-// Working on services and controllers. Double check middlewares
+// Working on services and controllers. Double check middlewares. Working on access control with CASL

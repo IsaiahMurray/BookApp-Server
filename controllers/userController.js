@@ -24,7 +24,7 @@ const {
     USER_FOUND
   } = require("../controllers/constants");
 
-  //! User register
+  //* User register
   UserController.route("/register").post(async (req, res) => {
     try {
       const { username, email, password } = req.body;
@@ -56,7 +56,7 @@ const {
     }
   });
 
-  //! User login
+  //* User login
   UserController.route("/login").post(async (req, res) => {
     try {
       const { email, password } = req.body;
@@ -93,5 +93,14 @@ const {
       }
     }
   });
+
+//! Patch email/username
+
+
+//! Update password
+//! User delete
+//! Upload pic
+//! Get pic
+//! Delete pic
   
   module.exports = UserController;
