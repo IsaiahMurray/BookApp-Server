@@ -21,6 +21,11 @@ const UserModel = db.define("user", {
     type: DataTypes.ENUM("Admin", "User"),
     allowNull: false,
   },
+  archiveAccount: {
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
+    defaultValue: false
+  }
 });
 
 module.exports = UserModel;
