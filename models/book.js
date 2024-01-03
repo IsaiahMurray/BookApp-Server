@@ -9,7 +9,7 @@ const BookModel = db.define('book', {
         allowNull: false
     },
     userId: {
-        type: DataTypes.NUMBER,
+        type: DataTypes.INTEGER,
         allowNull: false
     },
     title: {
@@ -37,7 +37,7 @@ const BookModel = db.define('book', {
         allowNull: true
     },
     rating: {
-        type: DataTypes.NUMBER,
+        type: DataTypes.DECIMAL,
         allowNull: true
     },
     tags: {
