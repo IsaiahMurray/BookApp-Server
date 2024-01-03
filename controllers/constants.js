@@ -6,7 +6,11 @@ const CREATE_FAIL = "Could not be created.";
 const UPDATE_FAIL = "Could not be updated.";
 const GET_FAIL = "Could not be retrieved.";
 const DELETE_FAIL = "Could not be deleted.";
-const NOT_FOUND = "Not found."
+const NOT_FOUND = "Not found.";
+const INCORRECT_EMAIL_PASSWORD = "Incorrect email or password.";
+const TITLE_LOGIN_ERROR = "Error logging in.";
+const TITLE_SIGNUP_ERROR = "Error signing up.";
+const USER_FOUND = "User has been found.";
 
 module.exports = {
     CREATE_FAIL,
@@ -17,5 +21,9 @@ module.exports = {
     DELETE_SUCCESS,
     GET_FAIL,
     GET_SUCCESS,
-    NOT_FOUND
+    NOT_FOUND,
+    INCORRECT_EMAIL_PASSWORD,
+    TITLE_LOGIN_ERROR,
+    TITLE_SIGNUP_ERROR,
+    USER_FOUND
 }
