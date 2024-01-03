@@ -18,8 +18,8 @@ ReviewModel.belongsTo(BookModel);
 BookModel.belongsTo(UserModel, { foreignKey: 'userId' });
 ChapterModel.belongsTo(BookModel, { foreignKey: 'bookId' });
 
-BookModel.belongsToMany(TagModel, { through: 'BookTags' });
-TagModel.belongsToMany(BookModel, { through: 'BookTags' });
+BookModel.belongsToMany(TagModel, { through: 'BookTags', as: 'bookTags' });
+TagModel.belongsToMany(BookModel, { through: 'BookTags', as: 'tagBooks' });
 
 module.exports = {
     UserModel,
