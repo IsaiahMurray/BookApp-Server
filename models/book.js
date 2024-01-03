@@ -32,7 +32,7 @@ const BookModel = db.define('book', {
         type: DataTypes.ENUM('public', 'private', 'limited'),
         allowNull: false
     },
-    hasRating: {
+    canRate: {
         type: DataTypes.BOOLEAN,
         allowNull: true
     },
@@ -43,38 +43,12 @@ const BookModel = db.define('book', {
     tags: {
         type: DataTypes.ARRAY(DataTypes.NUMBER),
         allowNull: true
-    }
+    },
+    canReview: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+    },
+    
 });
 
-const ChapterModel = db.define('chapter', {
-    bookId: {
-        type: DataTypes.NUMBER,
-        allowNull: false
-    },
-    title: {
-        type: DataTypes.STRING,
-        allowNull: false
-    },
-    content: {
-        type: DataTypes.STRING,
-        allowNull: false
-    },
-    chapterNumber: {
-        type: DataTypes.NUMBER,
-        allowNull: false
-    }
-});
-
-const TagModel = db.define('tag', {
-    tagName: {
-        type: DataTypes.STRING,
-        allowNull: false
-    }
-});
-
-BookModel.belongsTo(UserModel, { foreignKey: 'userId' });
-ChapterModel.belongsTo(BookModel, { foreignKey: 'bookId' });
-BookModel.belongsToMany(TagModel, { through: 'BookTags' });
-TagModel.belongsToMany(BookModel, { through: 'BookTags' });
-
-module.exports = {BookModel, ChapterModel, TagModel};
+module.exports = BookModel;
