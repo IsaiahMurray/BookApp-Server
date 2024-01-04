@@ -11,6 +11,7 @@ const controllers = require("./controllers");
 
 app.use(helmet());
 app.use("/user", controllers.UserController);
+app.use("/admin", controllers.AdminController);
 
 dbConnection
   .authenticate()
