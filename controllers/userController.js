@@ -1,7 +1,7 @@
 //* User register
 //* User login
 //* Patch email/username
-//! Update password
+//* Update password
 //! User delete
 
 const Services = require("../services/index");
@@ -148,7 +148,7 @@ UserController.route("/update/email").put(ValidateSession, async (req, res) => {
   }
 });
 
-//! Update password
+//* Update password
 UserController
   .route("/update/password")
   .put(ValidateSession, async (req, res) => {
@@ -164,6 +164,7 @@ UserController
         user: updatedUserPass,
         info: {
           message: UPDATE_SUCCESS,
+          password: password
         },
       });
     } catch (e) {
