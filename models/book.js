@@ -46,7 +46,7 @@ const BookModel = db.define('book', {
         type: DataTypes.BOOLEAN,
         allowNull: false,
     }, 
-    profilePicture: {
+    coverPicture: {
         type: DataTypes.STRING, // Store the path or URL of the profile picture
         allowNull: true, // Allow the profile picture to be optional
       },

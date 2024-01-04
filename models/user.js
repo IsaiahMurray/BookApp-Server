@@ -25,7 +25,11 @@ const UserModel = db.define("user", {
     type: DataTypes.BOOLEAN,
     allowNull: false,
     defaultValue: false
-  }
+  },
+  profilePicture: {
+    type: DataTypes.STRING, // Store the path or URL of the profile picture
+    allowNull: true, // Allow the profile picture to be optional
+  },
 });
 
 module.exports = UserModel;
