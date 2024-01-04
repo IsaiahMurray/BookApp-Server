@@ -1,11 +1,7 @@
-const UserController = require('./userController');
-const {BookController, ChapterController, TagController} = require('./bookController');
-
-
-
 module.exports ={
-    UserController,
-    BookController,
-    ChapterController,
-    TagController,
+    UserController: require('./userController'),
+    AdminController: require('./adminController'),
+    BookController: require('./bookController'),
+    ChapterController: require('./chapterController'),
+    TagController: require('./tagController'),
 };
