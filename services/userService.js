@@ -7,7 +7,7 @@ const create = async ({ username, email, password }) => {
       username,
       email,
       password,
-      role: "User",
+      role: "user",
     });
 
     return newUser;

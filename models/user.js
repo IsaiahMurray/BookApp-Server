@@ -18,7 +18,7 @@ const UserModel = db.define("user", {
     allowNull: false,
   },
   role: {
-    type: DataTypes.ENUM("Admin", "User"),
+    type: DataTypes.ENUM("admin", "user"),
     allowNull: false,
   },
   archiveAccount: {
