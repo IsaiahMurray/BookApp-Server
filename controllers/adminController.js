@@ -27,7 +27,7 @@ const services = require("../services/index");
     if (!email || !password) throw new Error(INCORRECT_EMAIL_PASSWORD);
 
     const hashedPassword = await Services.PasswordService.hashPassword(password);
-    const userId = await Services.admin.adminCreate({
+    const userId = await Services.AdminService.adminCreate({
       firstName,
       lastName,
       email,
@@ -55,7 +55,7 @@ const services = require("../services/index");
 });
 
 /**********************************
- ****** MODIFY ADMIN STATUS *******
+ ****** MODIFY ROLE *******
  *********************************/
 
  AdminController.route("/modify-role/:id").put(async (req, res) => {
