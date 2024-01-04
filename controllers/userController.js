@@ -1,6 +1,6 @@
 //* User register
 //* User login
-//! Patch email/username
+//* Patch email/username
 //! Update password
 //! User delete
 
@@ -121,7 +121,7 @@ UserController.route("/update/username").put(ValidateSession, async (req, res) =
   }
 });
 
-//! Update email
+//* Update email
 UserController.route("/update/email").put(ValidateSession, async (req, res) => {
   try {
     const { email } = req.body;
@@ -132,6 +132,7 @@ UserController.route("/update/email").put(ValidateSession, async (req, res) => {
       user: updatedUserEmail,
       info: {
         message: UPDATE_SUCCESS,
+        email: email
       },
     });
   } catch (e) {
