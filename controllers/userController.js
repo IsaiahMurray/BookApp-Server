@@ -2,7 +2,8 @@
 //* User login
 //* Patch email/username
 //* Update password
-//! User delete
+//! User Archive Account
+//* User delete
 
 const Services = require("../services/index");
 const UserController = require("express").Router();
@@ -180,7 +181,9 @@ UserController
     }
   });
 
-//! User delete
+//! User Archive Account
+
+//* User delete
 UserController.route("/delete").delete(ValidateSession, async (req, res) => {
   try {
     const { id } = req.user;
