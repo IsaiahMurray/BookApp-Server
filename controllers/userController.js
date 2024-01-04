@@ -91,13 +91,13 @@ const {
     }
   });
 
-//! Patch email/username
+//* Update username
 UserController.route("/update/username").put(ValidateSession, async (req, res) => {
   try {
     const { username } = req.body;
     const { id } = req.user;
 
-    const updatedUserName = await Services.UserService.modifyName(
+    const updatedUserName = await Services.UserService.modifyUsername(
       id,
       username
     );
@@ -105,6 +105,7 @@ UserController.route("/update/username").put(ValidateSession, async (req, res) =
       user: updatedUserName,
       info: {
         message: UPDATE_SUCCESS,
+        username: username
       },
     });
   } catch (e) {
