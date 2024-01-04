@@ -1,7 +1,19 @@
 const { BookModel } = require("../models");
 
 //? Create Book
-const create = async ({ author, userId, title, description, titleFont, contentFont, privacy, canRate, rating, tags, canReview }) => {
+const create = async ({
+  author,
+  userId,
+  title,
+  description,
+  titleFont,
+  contentFont,
+  privacy,
+  canRate,
+  rating,
+  tags,
+  canReview,
+}) => {
   try {
     const newBook = await BookModel.create({
       author,
@@ -23,6 +35,17 @@ const create = async ({ author, userId, title, description, titleFont, contentFo
   }
 };
 
+//? Get All Books
+const getAllBooks = async () => {
+  try {
+    const allBooks = await BookModel.findAll();
+
+    return allBooks;
+  } catch (e) {
+    throw e;
+  }
+};
+
 //? Get Book by Title
 const getByTitle = async (title) => {
   try {
@@ -34,57 +57,56 @@ const getByTitle = async (title) => {
   }
 };
 
-//? Update Book Title
-const modifyTitle = async (id, title) => {
+//? Get Book by ID
+const getById = async (id) => {
+  try {
+    const book = await BookModel.findByPk(id);
+
+    if (!book) {
+      throw new Error('Book not found');
+    }
+
+    return book;
+  } catch (e) {
+    throw e;
+  }
+};
+
+//? Modify Book
+const modifyBook = async ({
+  userId,
+  authorId,
+  title,
+  description,
+  titleFont,
+  contentFont,
+  privacy,
+  canRate,
+  rating,
+  tags,
+  canReview,
+}) => {
   try {
     const updatedBook = await BookModel.update(
       {
+        author: authorId,
         title: title,
-      },
-      {
-        where: {
-          id: id,
-        },
-      }
-    );
-    return updatedBook;
-  } catch (e) {
-    throw e;
-  }
-};
-
-//? Update Book Description
-const modifyDescription = async (id, description) => {
-  try {
-    const updatedBook = await BookModel.update(
-      {
         description: description,
-      },
-      {
-        where: {
-          id: id,
-        },
-      }
-    );
-    return updatedBook;
-  } catch (e) {
-    throw e;
-  }
-};
-
-//? Update Book Privacy
-const modifyPrivacy = async (id, privacy) => {
-  try {
-    const updatedBook = await BookModel.update(
-      {
+        titleFont: titleFont,
+        contentFont: contentFont,
         privacy: privacy,
+        canRate: canRate,
+        rating: rating,
+        tags: tags,
+        canReview: canReview,
       },
       {
         where: {
-          id: id,
+          id: userId,
         },
       }
     );
+
     return updatedBook;
   } catch (e) {
     throw e;
@@ -108,8 +130,8 @@ const remove = async (id) => {
 module.exports = {
   create,
   getByTitle,
-  modifyTitle,
-  modifyDescription,
-  modifyPrivacy,
+  getById,
+  getAllBooks,
+  modifyBook,
   remove,
 };
