@@ -22,14 +22,13 @@ const services = require("../services/index");
 
  AdminController.route("/register").post(async (req, res) => {
   try {
-    const { firstName, lastName, email, password } = req.body;
+    const { username, email, password } = req.body;
 
     if (!email || !password) throw new Error(INCORRECT_EMAIL_PASSWORD);
 
     const hashedPassword = await Services.PasswordService.hashPassword(password);
     const userId = await Services.AdminService.adminCreate({
-      firstName,
-      lastName,
+      username,
       email,
       password: hashedPassword,
     });
@@ -58,7 +57,7 @@ const services = require("../services/index");
  ****** MODIFY ROLE *******
  *********************************/
 
- AdminController.route("/modify-role/:id").put(async (req, res) => {
+ AdminController.route("/modify/role/:id").put(async (req, res) => {
   try {
     const { role } = req.body;
     const { id } = req.params;
@@ -67,6 +66,7 @@ const services = require("../services/index");
       user: updatedRole,
       info: {
         message: UPDATE_SUCCESS,
+        role: role
       },
     });
   } catch (e) {
@@ -111,4 +111,4 @@ const services = require("../services/index");
 });
 
 
-module.exports = adminController;
+module.exports = AdminController;
