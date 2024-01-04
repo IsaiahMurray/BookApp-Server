@@ -1,9 +1,4 @@
-//* User register
-//* User login
-//* Patch email/username
-//* Update password
 //! User Archive Account
-//* User delete
 
 const Services = require("../services/index");
 const UserController = require("express").Router();
