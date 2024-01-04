@@ -12,7 +12,6 @@ const { ValidateSession } = require("../middleware");
 const {
     INCORRECT_EMAIL_PASSWORD,
     CREATE_SUCCESS,
-    GET_SUCCESS,
     UPDATE_SUCCESS,
     UPDATE_FAIL,
     TITLE_LOGIN_ERROR,
