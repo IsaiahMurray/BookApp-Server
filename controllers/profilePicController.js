@@ -26,7 +26,7 @@ const uploadProfilePictureHandler = (req, res) => {
   const profilePicturePath = req.file.path; // Assuming the file path is available in req.file
   const userId = req.user.id; // Assuming you have authentication middleware providing the user ID
 
-  User.findByPk(userId)
+  UserModel.findByPk(userId)
     .then((user) => {
       if (!user) {
         return res.status(404).json({ error: 'User not found' });
