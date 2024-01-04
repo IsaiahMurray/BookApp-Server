@@ -34,4 +34,4 @@ NPM Dev Packages
 -mocha
 https://blog.logrocket.com/multer-nodejs-express-upload-file/#managing-user-inputs
 
-// Working on services and controllers. Double check middlewares. Working on access control with CASL
+// Working on services and controllers. Book and chapter up next. Double check middlewares. 
