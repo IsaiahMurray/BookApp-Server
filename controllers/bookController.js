@@ -172,8 +172,7 @@ BookController.route("/update/:bookId").put(ValidateSession, async (req, res) =>
     }
 });
 
-
-//! Patch Book
+//* Patch Book
 BookController.route("/patch/:bookId").patch(async (req, res) => {
     try {
         const bookId = req.params.bookId;
@@ -197,7 +196,6 @@ BookController.route("/patch/:bookId").patch(async (req, res) => {
         }
     }
 });
-
 
 //! Delete Book
 BookController.route("/delete").delete(async (req, res) => {
