@@ -92,6 +92,33 @@ const modifyBook = async (bookId, updatedBookData) => {
   }
 };
 
+//? Patch Book Property
+const patchBookProperty = async (bookId, propertyName, propertyValue) => {
+  try {
+    // Fetch the book by its ID
+    const book = await BookModel.findByPk(bookId);
+
+    if (!book) {
+      throw new Error('Book not found');
+    }
+
+    // Check if the provided property exists in the book model
+    if (!book[propertyName] && book[propertyName] !== 0) {
+      throw new Error('Invalid property name');
+    }
+
+    // Update the specified property dynamically
+    book[propertyName] = propertyValue;
+
+    // Save the updated book
+    const updatedBook = await book.save();
+
+    return updatedBook;
+  } catch (error) {
+    throw error;
+  }
+};
+
 //? Delete Book
 const remove = async (id) => {
   try {
@@ -112,5 +139,6 @@ module.exports = {
   getById,
   getAllBooks,
   modifyBook,
+  patchBookProperty,
   remove
 };

@@ -136,7 +136,7 @@ BookController.route("/get/:id").get(async (req, res) => {
   }
 });
 
-//! Update Book
+//* Update Book
 BookController.route("/update/:bookId").put(ValidateSession, async (req, res) => {
     try {
         const {bookId} = req.params;
@@ -174,20 +174,30 @@ BookController.route("/update/:bookId").put(ValidateSession, async (req, res) =>
 
 
 //! Patch Book
-BookController.route("/patch/:id").patch(async (req, res) => {
-  try {
-  } catch (e) {
-    if (e instanceof Error) {
-      const errorMessage = {
-        title: UPDATE_FAIL,
-        info: {
-          message: e.message,
-        },
-      };
-      res.send(errorMessage);
+BookController.route("/patch/:bookId").patch(async (req, res) => {
+    try {
+        const bookId = req.params.bookId;
+        const { propertyName, propertyValue } = req.body;
+
+        const updatedBook = await Services.BookService.patchBookProperty(bookId, propertyName, propertyValue);
+
+        res.status(200).json({
+            message: 'Book property updated successfully',
+            updatedBook
+        });
+    } catch (e) {
+        if (e instanceof Error) {
+            const errorMessage = {
+                title: 'Update Failed',
+                info: {
+                    message: e.message,
+                },
+            };
+            res.status(500).json(errorMessage);
+        }
     }
-  }
 });
+
 
 //! Delete Book
 BookController.route("/delete").delete(async (req, res) => {
