@@ -51,10 +51,15 @@ BookController.route("/create").post(ValidateSession, async (req, res) => {
   }
 });
 
-//! Get All Books
+//* Get All Books
 BookController.route("/get/all").get(async (req, res) => {
     try {
-    
+    const books = await Services.BookService.getAllBooks();
+
+    res.status(200).json({
+        message: GET_SUCCESS,
+        books
+    })
     } catch (e) {
       if (e instanceof Error) {
         const errorMessage = {
