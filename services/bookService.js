@@ -44,12 +44,16 @@ const getAllBooks = async () => {
   }
 };
 
-//? Get Book by Title
-const getByTitle = async (title) => {
+//? Get All Books by User ID
+const getBooksByUser = async (id) => {
   try {
-    const foundBook = await BookModel.findOne({ where: { title } });
+    const allBooks = await BookModel.findAll({
+      where: {
+        userId: id
+      }
+    });
 
-    return foundBook;
+    return allBooks;
   } catch (e) {
     throw e;
   }
@@ -127,9 +131,9 @@ const remove = async (id) => {
 
 module.exports = {
   create,
-  getByTitle,
+  getBooksByUser,
   getById,
   getAllBooks,
   modifyBook,
-  remove,
+  remove
 };

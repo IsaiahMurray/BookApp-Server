@@ -54,11 +54,11 @@ BookController.route("/create").post(ValidateSession, async (req, res) => {
 //* Get All Books
 BookController.route("/get/all").get(async (req, res) => {
     try {
-    const books = await Services.BookService.getAllBooks();
+    const allBooks = await Services.BookService.getAllBooks();
 
     res.status(200).json({
         message: GET_SUCCESS,
-        books
+        allBooks
     })
     } catch (e) {
       if (e instanceof Error) {
@@ -72,10 +72,21 @@ BookController.route("/get/all").get(async (req, res) => {
       }
     }
 });
-//! Get All Books by User
-BookController.route("get/:userId").get(async (req, res) => {
+
+//* Get All Books by User
+BookController.route("/get/books/:userId").get(async (req, res) => {
     try {
-    
+        const userId = req.params.userId;
+        const books = await Services.BookService.getBooksByUser(userId);
+
+        if (books.length === 0) {
+            return res.status(204).end("No books found for the user.");
+        }
+        
+        res.status(200).json({
+            message: GET_SUCCESS,
+            books
+        })
     } catch (e) {
       if (e instanceof Error) {
         const errorMessage = {
