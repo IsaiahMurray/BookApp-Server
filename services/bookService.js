@@ -10,7 +10,6 @@ const create = async ({
   contentFont,
   privacy,
   canRate,
-  rating,
   tags,
   canReview,
 }) => {
@@ -23,10 +22,9 @@ const create = async ({
       titleFont,
       contentFont,
       privacy,
-      canRate,
-      rating,
       tags,
       canReview,
+      canRate
     });
 
     return newBook;

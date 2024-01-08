@@ -15,10 +15,29 @@ const {
   NOT_FOUND,
 } = require("../controllers/constants");
 
-//! Create Book
-BookController.route("/create").post(async (req, res) => {
+//* Create Book
+BookController.route("/create").post(ValidateSession, async (req, res) => {
   try {
-    const {author, title, description, titleFont, contentFont, privacy, canRate, rating, tags, } = req.body;
+    console.log(req.user)
+    const userId = req.user.id;
+    const {author, title, description, titleFont, contentFont, privacy, canRate, rating, tags, canReview} = req.body;
+
+    const newBook = await Services.BookService.create({author,
+        userId,
+        title,
+        description,
+        titleFont,
+        contentFont,
+        privacy,
+        canRate,
+        rating,
+        tags,
+        canReview})
+        
+        res.status(200).json({
+            message: CREATE_SUCCESS,
+            newBook
+          });
   } catch (e) {
     if (e instanceof Error) {
       const errorMessage = {
@@ -31,6 +50,7 @@ BookController.route("/create").post(async (req, res) => {
     }
   }
 });
+
 //! Get All Books
 BookController.route("/get/all").get(async (req, res) => {
     try {
@@ -82,7 +102,7 @@ BookController.route("get/:id").get(async (req, res) => {
 //! Update Book
 BookController.route("update/:id").put(async (req, res) => {
     try {
-    
+        const {author, title, description, titleFont, contentFont, privacy, canRate, rating, tags, } = req.body;
     } catch (e) {
       if (e instanceof Error) {
         const errorMessage = {
