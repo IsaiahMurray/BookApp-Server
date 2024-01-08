@@ -1,6 +1,6 @@
 Arial (sans-serif)
 Verdana (sans-serif)
-Tahoma (sans-serif)
+Tahoma (sans-serif) - Tahoma, Verdana, Segoe, sans-serif
 Trebuchet MS (sans-serif)
 Times New Roman (serif)
 Georgia (serif)
