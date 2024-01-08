@@ -75,43 +75,20 @@ const getById = async (id) => {
 };
 
 //? Modify Book
-const modifyBook = async ({
-  userId,
-  authorId,
-  title,
-  description,
-  titleFont,
-  contentFont,
-  privacy,
-  canRate,
-  rating,
-  tags,
-  canReview,
-}) => {
+const modifyBook = async (bookId, updatedBookData) => {
   try {
-    const updatedBook = await BookModel.update(
-      {
-        author: authorId,
-        title: title,
-        description: description,
-        titleFont: titleFont,
-        contentFont: contentFont,
-        privacy: privacy,
-        canRate: canRate,
-        rating: rating,
-        tags: tags,
-        canReview: canReview,
-      },
-      {
-        where: {
-          id: userId,
-        },
-      }
-    );
+    const [rowsUpdated, [updatedBook]] = await BookModel.update(updatedBookData, {
+      where: { id: bookId },
+      returning: true, // To get the updated book data
+    });
+
+    if (rowsUpdated === 0) {
+      throw new Error('Book update failed');
+    }
 
     return updatedBook;
-  } catch (e) {
-    throw e;
+  } catch (error) {
+    throw error;
   }
 };
 
