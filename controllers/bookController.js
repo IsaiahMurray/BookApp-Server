@@ -99,10 +99,18 @@ BookController.route("/get/books/:userId").get(async (req, res) => {
       }
     }
 });
+
 //! Get single Book
-BookController.route("get/:id").get(async (req, res) => {
+BookController.route("/get/:id").get(async (req, res) => {
     try {
-    
+    const {id} = req.params;
+    const book = await Services.BookService.getById(id);
+
+    res.status(200).json({
+        message: GET_SUCCESS,
+        book
+    })
+
     } catch (e) {
       if (e instanceof Error) {
         const errorMessage = {
@@ -116,7 +124,7 @@ BookController.route("get/:id").get(async (req, res) => {
     }
 });
 //! Update Book
-BookController.route("update/:id").put(async (req, res) => {
+BookController.route("/update/:id").put(async (req, res) => {
     try {
         const {author, title, description, titleFont, contentFont, privacy, canRate, rating, tags, } = req.body;
     } catch (e) {
@@ -133,7 +141,7 @@ BookController.route("update/:id").put(async (req, res) => {
 });
 
 //! Patch Book
-BookController.route("patch/:id").patch(async (req, res) => {
+BookController.route("/patch/:id").patch(async (req, res) => {
     try {
     
     } catch (e) {
