@@ -34,4 +34,4 @@ NPM Dev Packages
 -mocha
 https://blog.logrocket.com/multer-nodejs-express-upload-file/#managing-user-inputs
 
-// Working on services and controllers. Book and chapter up next. Double check middlewares. 
+// Working on services and controllers. Book delete and then chapter up next. Double check middlewares. 
