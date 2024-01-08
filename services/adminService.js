@@ -25,12 +25,12 @@ const getByEmail = async (email) => {
   }
 };
 
-const getById = async ({ id }) => {
+const getById = async (id) => {
   const foundUser = await UserModel.findOne({ where: { id } });
   return foundUser;
 };
 
-const getAll = async () => {
+const getAllUsers = async () => {
   try {
     const users = await UserModel.findAll();
     return users;
@@ -68,7 +68,7 @@ const remove = async (id) => {
 
 module.exports = {
   adminCreate,
-  getAll,
+  getAllUsers,
   getByEmail,
   getById,
   modifyRole,
