@@ -11,6 +11,8 @@ const INCORRECT_EMAIL_PASSWORD = "Incorrect email or password.";
 const TITLE_LOGIN_ERROR = "Error logging in.";
 const TITLE_SIGNUP_ERROR = "Error signing up.";
 const USER_FOUND = "User has been found.";
+const CONTENT_EXISTS = "This content already exists.";
+const CONFLICT = "There is a conflict with this request.";
 
 module.exports = {
     CREATE_FAIL,
@@ -25,5 +27,7 @@ module.exports = {
     INCORRECT_EMAIL_PASSWORD,
     TITLE_LOGIN_ERROR,
     TITLE_SIGNUP_ERROR,
-    USER_FOUND
+    USER_FOUND,
+    CONFLICT,
+    CONTENT_EXISTS
 }
