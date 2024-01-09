@@ -58,7 +58,7 @@ ChapterController.route("/create/:bookId").post(async (req, res) => {
       }
     }
   });
-  
+
 
 //* Update Chapter by ID
 ChapterController.route("/update/:chapterId").put(async (req, res) => {
