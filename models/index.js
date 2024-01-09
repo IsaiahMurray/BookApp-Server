@@ -1,9 +1,9 @@
 // Import and define your Sequelize models
-const UserModel = require('./user')
-const BookModel = require('./book')
-const ChapterModel = require('./chapter')
-const TagModel = require('./tag')
-const ReviewModel = require('./review')
+const UserModel = require('./user');
+const BookModel = require('./book');
+const ChapterModel = require('./chapter');
+const TagModel = require('./tag');
+const ReviewModel = require('./review');
 
 // Define associations between models
 ReviewModel.belongsTo(UserModel);
@@ -20,6 +20,8 @@ ChapterModel.belongsTo(BookModel, { foreignKey: 'bookId' });
 
 BookModel.belongsToMany(TagModel, { through: 'BookTags', as: 'bookTags' });
 TagModel.belongsToMany(BookModel, { through: 'BookTags', as: 'tagBooks' });
+
+ChapterModel.belongsTo(UserModel, { foreignKey: 'userId', as: 'user' }); // New association
 
 module.exports = {
     UserModel,
