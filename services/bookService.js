@@ -24,7 +24,7 @@ const create = async ({
       privacy,
       tags,
       canReview,
-      canRate
+      canRate,
     });
 
     return newBook;
@@ -42,7 +42,7 @@ const getAllBooks = async () => {
     // Check if there are no books found
     if (!allBooks || allBooks.length === 0) {
       // If no books found, throw a 404 error
-      const error = new Error('No books found');
+      const error = new Error("No books found");
       error.status = 404;
       throw error;
     }
@@ -59,8 +59,8 @@ const getBooksByUser = async (id) => {
     // Retrieve books associated with the given user ID
     const userBooks = await BookModel.findAll({
       where: {
-        userId: id
-      }
+        userId: id,
+      },
     });
 
     // Check if there are no books found for the user
@@ -86,7 +86,7 @@ const getById = async (id) => {
     // Check if the book does not exist
     if (!book) {
       // If the book is not found, throw an error indicating the absence of the book
-      const error = new Error('Book not found');
+      const error = new Error("Book not found");
       error.status = 404;
       throw error;
     }
@@ -99,7 +99,7 @@ const getById = async (id) => {
 };
 
 //? Modify Book
-const modifyBook = async (bookId, updatedBookData) => {
+const modifyBook = async (userId, bookId, updatedBookData) => {
   try {
     // Find the book to be updated
     const bookToUpdate = await BookModel.findByPk(bookId);
@@ -107,7 +107,7 @@ const modifyBook = async (bookId, updatedBookData) => {
     // Check if the book exists
     if (!bookToUpdate) {
       // If the book does not exist, throw an error indicating the update failure
-      const error = new Error('Book not found');
+      const error = new Error("Book not found");
       error.status = 404;
       throw error;
     }
@@ -115,21 +115,26 @@ const modifyBook = async (bookId, updatedBookData) => {
     // Check if the book belongs to the user
     if (bookToUpdate.userId !== userId) {
       // If the book doesn't belong to the user, throw an error indicating access denial
-      const error = new Error('Access denied - Book does not belong to the user');
+      const error = new Error(
+        "Access denied - Book does not belong to the user"
+      );
       error.status = 403; // Forbidden status code
       throw error;
     }
 
     // Update the book with the provided data if it exists and belongs to the user
-    const [rowsUpdated, [updatedBook]] = await BookModel.update(updatedBookData, {
-      where: { id: bookId },
-      returning: true, // To get the updated book data
-    });
+    const [rowsUpdated, [updatedBook]] = await BookModel.update(
+      updatedBookData,
+      {
+        where: { id: bookId },
+        returning: true, // To get the updated book data
+      }
+    );
 
     // Check if the book update failed
     if (rowsUpdated === 0) {
       // If the update fails, throw an error indicating the update failure
-      throw new Error('Book update failed');
+      throw new Error("Book update failed");
     }
 
     // Return the updated book object
@@ -140,30 +145,45 @@ const modifyBook = async (bookId, updatedBookData) => {
 };
 
 //? Patch Book Property
-const patchBookProperty = async (bookId, propertyName, propertyValue) => {
+const patchBookProperty = async (
+  userId,
+  bookId,
+  propertyName,
+  propertyValue
+) => {
   try {
     // Fetch the book by its ID
-    const book = await BookModel.findByPk(bookId);
+    const bookToUpdate = await BookModel.findByPk(bookId);
 
     // Check if the book exists
     if (!book) {
-      const error = new Error('Book not found');
+      const error = new Error("Book not found");
       error.status = 404; // Set status to indicate resource not found
       throw error;
     }
 
+    // Check if the book belongs to the user
+    if (bookToUpdate.userId !== userId) {
+      // If the book doesn't belong to the user, throw an error indicating access denial
+      const error = new Error(
+        "Access denied - Book does not belong to the user"
+      );
+      error.status = 403; // Forbidden status code
+      throw error;
+    }
+
     // Check if the provided property exists in the book model
-    if (!book[propertyName] && book[propertyName] !== 0) {
-      const error = new Error('Invalid property name');
+    if (!bookToUpdate[propertyName] && bookToUpdate[propertyName] !== 0) {
+      const error = new Error("Invalid property name");
       error.status = 400; // Set status to indicate a bad request due to an invalid property name
       throw error;
     }
 
     // Update the specified property dynamically
-    book[propertyName] = propertyValue;
+    bookToUpdate[propertyName] = propertyValue;
 
     // Save the updated book
-    const updatedBook = await book.save();
+    const updatedBook = await bookToUpdate.save();
 
     return updatedBook;
   } catch (error) {
@@ -179,7 +199,7 @@ const deleteBook = async (bookId) => {
 
     // Check if the book exists
     if (!bookToDelete) {
-      const error = new Error('Book not found');
+      const error = new Error("Book not found");
       error.status = 404; // Set status to indicate resource not found
       throw error;
     }
@@ -200,5 +220,5 @@ module.exports = {
   getAllBooks,
   modifyBook,
   patchBookProperty,
-  deleteBook
+  deleteBook,
 };
