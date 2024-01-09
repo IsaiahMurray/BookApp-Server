@@ -1,11 +1,29 @@
 const { ChapterModel } = require("../models");
 
-const createChapter = async ({ bookId, title, content, chapterNumber }) => {
+const createChapter = async ({ userId, bookId, title, content, chapterNumber }) => {
   try {
+    // Check if chapterNumber already exists for the given bookId
+    const existingChapter = await ChapterModel.findOne({
+      where: {
+          bookId,
+          chapterNumber
+      }
+  });
+
+  if (existingChapter) {
+      // If a chapter with the same number exists, return a 409 Conflict error
+      const error = new Error('Chapter number already exists for this book');
+      error.status = 409; // Set a custom status code
+      throw error;
+  }
+    // Replace manual line breaks with '\n' escape sequence
+    const formattedContent = content.replace(/\r?\n|\r/g, '\\n');
+
     const newChapter = await ChapterModel.create({
+      userId,
       bookId,
       title,
-      content,
+      content: formattedContent,
       chapterNumber,
     });
     return newChapter;
@@ -29,52 +47,36 @@ const getChaptersByBookId = async (bookId) => {
   }
 };
 
-const updateChapter = async (chapterId, { title, content, chapterNumber }) => {
+const updateChapter = async ({ chapterId, title, content, chapterNumber, userId }) => {
   try {
-    //Check if the chapter exists
-    const chapterToUpdate = await ChapterModel.findByPk(chapterId);
+      // Check if the chapter exists
+      const existingChapter = await ChapterModel.findOne({
+          where: {
+              id: chapterId,
+              userId // Ensure the chapter belongs to the specified user
+          }
+      });
 
-    //If no chapter, return 404
-    if (!chapterToUpdate) {
-      const error = new Error('Chapter not found');
-      error.status = 404;
-      throw error;
-  }
-  
-    const [rowsUpdated, [updatedChapter]] = await ChapterModel.update(
-      { title, content, chapterNumber },
-      { where: { id: chapterId }, returning: true }
-    );
+      if (!existingChapter) {
+          const error = new Error('Chapter not found');
+          error.status = 404; // Set the status code to 404 for resource not found
+          throw error;
+      }
 
-    if (rowsUpdated === 0) {
-      const error = new Error("Chapter update failed");
-      error.status = 500;
-      throw error;
-    }
+      // Replace manual line breaks with '\n' escape sequence
+      const formattedContent = content.replace(/\r?\n|\r/g, '\\n');
 
-    return updatedChapter;
+      // Update the chapter with the formatted content
+      const updatedChapter = await existingChapter.update({
+          title,
+          content: formattedContent,
+          chapterNumber,
+          userId
+      });
+      
+      return updatedChapter;
   } catch (error) {
-    throw error;
-  }
-};
-
-const patchChapter = async (chapterId, propertyName, propertyValue) => {
-  try {
-    const chapter = await ChapterModel.findByPk(chapterId);
-
-    if (!chapter) {
-      const error = new Error("Chapter not found");
-      error.status = 404;
       throw error;
-    }
-
-    chapter[propertyName] = propertyValue;
-
-    const updatedChapter = await chapter.save();
-
-    return updatedChapter;
-  } catch (error) {
-    throw error;
   }
 };
 
@@ -100,6 +102,5 @@ module.exports = {
   createChapter,
   getChaptersByBookId,
   updateChapter,
-  patchChapter,
   deleteChapter,
 };
