@@ -14,6 +14,8 @@ const USER_FOUND = "User has been found.";
 const CONTENT_EXISTS = "This content already exists.";
 const CONFLICT = "There is a conflict with this request.";
 const NO_AUTH = "Access denied.";
+const INVALID_TOKEN = "Your token is not valid.";
+const BAD_REQ = "Bad request."
 
 module.exports = {
     CREATE_FAIL,
@@ -31,5 +33,7 @@ module.exports = {
     USER_FOUND,
     CONFLICT,
     CONTENT_EXISTS,
-    NO_AUTH
+    NO_AUTH,
+    INVALID_TOKEN,
+    BAD_REQ
 }
