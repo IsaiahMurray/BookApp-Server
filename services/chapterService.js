@@ -34,15 +34,21 @@ const createChapter = async ({ userId, bookId, title, content, chapterNumber }) 
 
 const getChaptersByBookId = async (bookId) => {
   try {
+    // Find all chapters associated with the specified bookId
     const chapters = await ChapterModel.findAll({ where: { bookId } });
 
+    // Check if no chapters were found for the given bookId
     if (!chapters || chapters.length === 0) {
+      // If no chapters are found, create an error object
       const error = new Error('No chapters found for this book');
-      error.status = 404;
-      throw error;
-  }
+      error.status = 404; // Set the status code to 404 for resource not found
+      throw error; // Throw the error to handle it further
+    }
+
+    // If chapters are found, return the array of chapters
     return chapters;
   } catch (error) {
+    // If any error occurs during the retrieval process, throw the error
     throw error;
   }
 };
@@ -82,21 +88,28 @@ const updateChapter = async ({ chapterId, title, content, chapterNumber, userId 
 
 const deleteChapter = async (chapterId) => {
   try {
+    // Find the chapter by its primary key (chapterId)
     const deletedChapter = await ChapterModel.findByPk(chapterId);
 
+    // Check if the chapter exists
     if (!deletedChapter) {
+      // If the chapter doesn't exist, create an error object
       const error = new Error("Chapter not found");
-      error.status = 404;
-      throw error;
+      error.status = 404; // Set the status code to 404 for resource not found
+      throw error; // Throw the error to handle it further
     }
 
+    // If the chapter exists, delete it from the database
     await deletedChapter.destroy();
 
+    // Return the deleted chapter object after successful deletion
     return deletedChapter;
   } catch (error) {
+    // If any error occurs during the deletion process, throw the error
     throw error;
   }
 };
+
 
 module.exports = {
   createChapter,
