@@ -49,6 +49,43 @@ ChapterController.route("/create/:bookId").post(async (req, res) => {
         } else {
           // Internal server error for other errors
           res.status(500).json({
+            title: CREATE_FAIL,
+            info: {
+              message: e.message,
+            },
+          });
+        }
+      }
+    }
+  });
+  
+  //* Get Chapters by Book ID
+  ChapterController.route("/get/:bookId").get(async (req, res) => {
+    try {
+      const { bookId } = req.params;
+  
+      // Call the service function to get chapters by bookId
+      const chapters = await Services.ChapterService.getChaptersByBookId(bookId);
+  
+      // Respond with chapters if found
+      res.status(200).json({
+        message: GET_SUCCESS,
+        chapters,
+      });
+    } catch (e) {
+      if (e instanceof Error) {
+        // Handle different error scenarios
+        if (e.status === 404) {
+          // Not Found error (if no chapters found for the book)
+          res.status(404).json({
+            title: NOT_FOUND,
+            info: {
+              message: e.message,
+            },
+          });
+        } else {
+          // Internal server error for other errors
+          res.status(500).json({
             title: GET_FAIL,
             info: {
               message: e.message,
@@ -58,28 +95,67 @@ ChapterController.route("/create/:bookId").post(async (req, res) => {
       }
     }
   });
-
+  
 
 //* Update Chapter by ID
 ChapterController.route("/update/:chapterId").put(async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { chapterId } = req.params;
+    const { title, content, chapterNumber } = req.body;
+
+    // Call the service function to update the chapter
+    const updatedChapter = await Services.ChapterService.updateChapter({
+      chapterId,
+      title,
+      content,
+      chapterNumber,
+      userId
+    });
+
+    // Respond with a success message and the updated chapter
+    res.status(200).json({
+      message: UPDATE_SUCCESS,
+      updatedChapter,
+    });
+  } catch (e) {
+    if (e instanceof Error) {
+      // Handle different error scenarios
+      if (e.status === 404) {
+        // Not Found error (if the chapter doesn't exist)
+        res.status(404).json({
+          title: NOT_FOUND,
+          info: {
+            message: e.message,
+          },
+        });
+      } else {
+        // Internal server error for other errors
+        res.status(500).json({
+          title: UPDATE_FAIL,
+          info: {
+            message: e.message,
+          },
+        });
+      }
+    }
+  }
+});
+
+//* Delete Chapter by ID
+ChapterController.route("/delete/:chapterId").delete(async (req, res) => {
     try {
-      const userId = req.user.id;
-      const { chapterId } = req.params;
-      const { title, content, chapterNumber } = req.body;
+      const chapterId = req.params.chapterId;
   
-      // Call the service function to update the chapter
-      const updatedChapter = await Services.ChapterService.updateChapter({
-        chapterId,
-        title,
-        content,
-        chapterNumber,
-        userId
-      });
+      // Call the service function to delete the chapter by chapterId
+      const deletedChapter = await Services.ChapterService.deleteChapter(
+        chapterId
+      );
   
-      // Respond with a success message and the updated chapter
+      // Respond with a success message and the deleted chapter
       res.status(200).json({
-        message: UPDATE_SUCCESS,
-        updatedChapter,
+        message: DELETE_SUCCESS,
+        deletedChapter,
       });
     } catch (e) {
       if (e instanceof Error) {
@@ -95,7 +171,7 @@ ChapterController.route("/update/:chapterId").put(async (req, res) => {
         } else {
           // Internal server error for other errors
           res.status(500).json({
-            title: UPDATE_FAIL,
+            title: DELETE_FAIL,
             info: {
               message: e.message,
             },
