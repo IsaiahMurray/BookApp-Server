@@ -120,14 +120,17 @@ const patchBookProperty = async (bookId, propertyName, propertyValue) => {
 };
 
 //? Delete Book
-const remove = async (id) => {
+const deleteBook = async (bookId) => {
   try {
-    const deletedBook = await BookModel.destroy({
-      where: {
-        id: id,
-      },
-    });
-    return deletedBook;
+      const bookToDelete = await BookModel.findByPk(bookId);
+
+    if (!bookToDelete) {
+      throw new Error('Book not found');
+    }
+
+    await bookToDelete.destroy();
+
+    return bookToDelete;
   } catch (e) {
     throw e;
   }
@@ -140,5 +143,5 @@ module.exports = {
   getAllBooks,
   modifyBook,
   patchBookProperty,
-  remove
+  deleteBook
 };

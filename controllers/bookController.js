@@ -12,7 +12,6 @@ const {
   UPDATE_FAIL,
   DELETE_FAIL,
   DELETE_SUCCESS,
-  NOT_FOUND,
 } = require("../controllers/constants");
 
 //* Create Book
@@ -59,7 +58,7 @@ BookController.route("/create").post(ValidateSession, async (req, res) => {
           message: e.message,
         },
       };
-      res.send(errorMessage);
+      res.status(500).send(errorMessage);
     }
   }
 });
@@ -81,7 +80,7 @@ BookController.route("/get/all").get(async (req, res) => {
           message: e.message,
         },
       };
-      res.send(errorMessage);
+      res.status(500).send(errorMessage);
     }
   }
 });
@@ -108,7 +107,7 @@ BookController.route("/get/books/:userId").get(async (req, res) => {
           message: e.message,
         },
       };
-      res.send(errorMessage);
+      res.status(500).send(errorMessage);
     }
   }
 });
@@ -131,7 +130,7 @@ BookController.route("/get/:id").get(async (req, res) => {
           message: e.message,
         },
       };
-      res.send(errorMessage);
+      res.status(500).send(errorMessage);
     }
   }
 });
@@ -197,9 +196,16 @@ BookController.route("/patch/:bookId").patch(async (req, res) => {
     }
 });
 
-//! Delete Book
-BookController.route("/delete").delete(async (req, res) => {
+//* Delete Book
+BookController.route("/delete/:bookId").delete(async (req, res) => {
   try {
+    const {bookId} = req.params;
+    const deletedBook = await Services.BookService.deleteBook(bookId);
+
+    res.status(200).json({
+        message: DELETE_SUCCESS,
+        deletedBook
+    });
   } catch (e) {
     if (e instanceof Error) {
       const errorMessage = {
@@ -208,7 +214,7 @@ BookController.route("/delete").delete(async (req, res) => {
           message: e.message,
         },
       };
-      res.send(errorMessage);
+      res.status(500).send(errorMessage);
     }
   }
 });
