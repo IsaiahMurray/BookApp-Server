@@ -155,7 +155,7 @@ BookController.route("/update/:bookId").put(ValidateSession, async (req, res) =>
         const updatedBook = await Services.BookService.modifyBook(bookId, updatedBookData);
 
         res.status(200).json({
-            message: 'Book updated successfully',
+            message: UPDATE_SUCCESS,
             updatedBook
         });
     } catch (e) {
