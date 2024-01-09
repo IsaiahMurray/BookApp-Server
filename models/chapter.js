@@ -11,11 +11,11 @@ const ChapterModel = db.define('chapter', {
         allowNull: false
     },
     content: {
-        type: DataTypes.STRING,
+        type: DataTypes.TEXT,
         allowNull: false
     },
     chapterNumber: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.DECIMAL,
         allowNull: false
     }
 });
