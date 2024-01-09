@@ -1,6 +1,5 @@
 const {
   INVALID_TOKEN,
-  TOKEN_ERROR,
   NO_AUTH,
 } = require("../controllers/constants");
 const jwt = require("jsonwebtoken");
@@ -26,17 +25,18 @@ module.exports = async (req, res, next) => {
           .catch((err) => next(err));
       } else {
         req.errors = err;
-        return res.status(500).send("Not Authorized");
+        return res.status(403).send(NO_AUTH);
       }
     });
   } catch (e) {
     if (e instanceof Error) {
       const errorMessage = {
-        title: TOKEN_ERROR,
+        title: INVALID_TOKEN,
         info: {
           message: e.message,
         },
       };
+      errorMessage.status(500);
       res.send(errorMessage);
     }
   }
