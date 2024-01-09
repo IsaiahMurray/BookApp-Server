@@ -13,6 +13,7 @@ const TITLE_SIGNUP_ERROR = "Error signing up.";
 const USER_FOUND = "User has been found.";
 const CONTENT_EXISTS = "This content already exists.";
 const CONFLICT = "There is a conflict with this request.";
+const NO_AUTH = "Access denied.";
 
 module.exports = {
     CREATE_FAIL,
@@ -29,5 +30,6 @@ module.exports = {
     TITLE_SIGNUP_ERROR,
     USER_FOUND,
     CONFLICT,
-    CONTENT_EXISTS
+    CONTENT_EXISTS,
+    NO_AUTH
 }
