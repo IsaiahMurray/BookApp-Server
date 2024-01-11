@@ -136,6 +136,38 @@ BookController.route("/get/:id").get(async (req, res) => {
   }
 });
 
+//* Get Books by tags
+BookController.route('/get-tags').get(async (req, res) => {
+  try {
+    const { tags } = req.query;
+
+    if (!tags || !Array.isArray(tags)) {
+      return res.status(400).json({
+        title: 'Invalid request',
+        info: {
+          message: 'Tags parameter must be an array',
+        },
+      });
+    }
+
+    const books = await BookService.getBooksByTags(tags);
+
+    res.status(200).json({
+      message: GET_SUCCESS,
+      books,
+    });
+  } catch (e) {
+    if (e instanceof Error) {
+      res.status(500).json({
+        title: GET_FAIL,
+        info: {
+          message: e.message,
+        },
+      });
+    }
+  }
+});
+
 //* Update Book
 BookController.route("/update/:bookId").put(
   ValidateSession,
