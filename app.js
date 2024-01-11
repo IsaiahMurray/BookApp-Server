@@ -13,6 +13,7 @@ app.use(helmet());
 app.use("/user", controllers.UserController);
 app.use("/admin", controllers.AdminController);
 app.use("/book", controllers.BookController);
+app.use("/tag", controllers.TagController);
 app.use("/review", middlewares.ValidateSession, controllers.ReviewController);
 app.use("/chapter", middlewares.ValidateSession, controllers.ChapterController);
 
