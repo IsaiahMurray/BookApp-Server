@@ -1,4 +1,6 @@
-const { TagModel } = require("../models");
+const TagController = require("../controllers/tagController");
+const { ValidateSession, ValidateAdmin } = require("../middleware");
+const { TagModel, BookModel } = require("../models");
 
 // Create a new tag
 const createTag = async (tagName) => {
@@ -89,9 +91,60 @@ const deleteTag = async (tagId) => {
   }
 };
 
+// Add multiple Tags to a Book
+const addMultipleTagsToBook = async (bookId, tagIds) => {
+  try {
+    const book = await BookModel.findByPk(bookId);
+
+    if (!book) {
+      const error = new Error('Book not found');
+      error.status = 404;
+      throw error;
+    }
+
+    const tagsToAdd = await TagModel.findAll({
+      where: {
+        id: tagIds,
+      },
+    });
+
+    await book.addTags(tagsToAdd);
+
+    return `Tags added to book with ID ${bookId} successfully.`;
+  } catch (error) {
+    throw error;
+  }
+};
+
+// Remove multiple Tags from a Book
+const removeMultipleTagsFromBook = async (bookId, tagIds) => {
+  try {
+    const book = await BookModel.findByPk(bookId);
+
+    if (!book) {
+      const error = new Error('Book not found');
+      error.status = 404;
+      throw error;
+    }
+
+    const tagsToRemove = await TagModel.findAll({
+      where: {
+        id: tagIds,
+      },
+    });
+
+    await book.removeTags(tagsToRemove);
+
+    return `Tags removed from book with ID ${bookId} successfully.`;
+  } catch (error) {
+    throw error;
+  }
+};
 module.exports = {
   createTag,
   getAllTags,
   updateTag,
   deleteTag,
+  addMultipleTagsToBook,
+  removeMultipleTagsFromBook
 };

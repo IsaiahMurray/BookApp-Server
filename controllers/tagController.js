@@ -1,6 +1,6 @@
 const { TagService } = require("../services");
 const TagController = require("express").Router();
-const { ValidateAdmin } = require("../middleware");
+const { ValidateAdmin, ValidateSession } = require("../middleware");
 
 // Constants for error messages or success messages are imported from a separate file
 const {
@@ -157,5 +157,31 @@ TagController.route("/delete/:tagId").delete(
     }
   }
 );
+
+// Remove Tags from Book
+TagController.route('/book/:bookId/tags').post( ValidateSession, ValidateAdmin, async (req, res) => {
+  try {
+    const { bookId } = req.params;
+    const { tagIds } = req.body;
+
+    const result = await TagService.addMultipleTagsToBook(bookId, tagIds);
+    return result;
+  } catch (e) {
+    throw e;
+  }
+});
+
+// Add Tags to Book
+TagController.route('/book/:bookId/tags').delete(ValidateSession, ValidateAdmin, async (req, res) => {
+  try {
+    const { bookId } = req.params;
+    const { tagIds } = req.body;
+
+    const result = await TagService.removeMultipleTagsFromBook(bookId, tagIds);
+    return result;
+  } catch (e) {
+    throw e;
+  }
+});
 
 module.exports = TagController;
