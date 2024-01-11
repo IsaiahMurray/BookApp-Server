@@ -20,7 +20,7 @@ TagController.route("/create").post(async (req, res) => {
   try {
     const { tagName } = req.body;
 
-    const newTag = await Services.TagService.createTag(tagName);
+    const newTag = await TagService.createTag(tagName);
 
     res.status(201).json({
       message: CREATE_SUCCESS,
@@ -83,10 +83,75 @@ TagController.route("/get").get(async (req, res) => {
   }
 });
 
-//! Update Tag
-TagController.route("/update/:tagId").put(async (req, res) => {});
+//* Update Tag
+TagController.route('/update/:tagId').put(async (req, res) => {
+  try {
+    const { tagId } = req.params;
+    const { tagName } = req.body;
 
-//! Delete Tag
-TagController.route("/delete/:tagId").delete(async (req, res) => {});
+    const updatedTag = await TagService.updateTag(tagId, tagName);
+
+    res.status(200).json({
+      message: UPDATE_SUCCESS,
+      updatedTag,
+    });
+  } catch (e) {
+    if (e instanceof Error) {
+      // Handle different error scenarios
+      if (e.status === 404) {
+        // Not Found error (if no tag found)
+        res.status(404).json({
+          title: NOT_FOUND,
+          info: {
+            message: e.message,
+          },
+        });
+      } else {
+        // Internal server error for other errors
+        res.status(500).json({
+          title: GET_FAIL,
+          info: {
+            message: e.message,
+          },
+        });
+      }
+    }
+  }
+});
+
+//* Delete Tag
+TagController.route('/delete/:tagId').delete(async (req, res) => {
+  try {
+    const { tagId } = req.params;
+
+    const deletedTag = await TagService.deleteTag(tagId);
+
+    res.status(200).json({
+      message: DELETE_SUCCESS,
+      deletedTag,
+    });
+  } catch (e) {
+    if (e instanceof Error) {
+      // Handle different error scenarios
+      if (e.status === 404) {
+        // Not Found error (if no tag found)
+        res.status(404).json({
+          title: NOT_FOUND,
+          info: {
+            message: e.message,
+          },
+        });
+      } else {
+        // Internal server error for other errors
+        res.status(500).json({
+          title: GET_FAIL,
+          info: {
+            message: e.message,
+          },
+        });
+      }
+    }
+  }
+});
 
 module.exports = TagController;
