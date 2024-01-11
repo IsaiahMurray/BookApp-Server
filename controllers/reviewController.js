@@ -14,46 +14,49 @@ const {
 } = require("./constants");
 
 //* Create a new review
-ReviewController.route("/create/:bookId").post(ValidateSession, async (req, res) => {
-  try {
-    console.log(req)
-    const userId = req.user.id;
-    const { bookId } = req.params;
-    const { comment, rating } = req.body;
+ReviewController.route("/create/:bookId").post(
+  ValidateSession,
+  async (req, res) => {
+    try {
+      console.log(req);
+      const userId = req.user.id;
+      const { bookId } = req.params;
+      const { comment, rating } = req.body;
 
-    const newReview = await Services.ReviewService.createReview(
-      userId,
-      bookId,
-      comment,
-      rating
-    );
+      const newReview = await Services.ReviewService.createReview(
+        userId,
+        bookId,
+        comment,
+        rating
+      );
 
-    res.status(201).json({
-      message: CREATE_SUCCESS,
-      newReview,
-    });
-  } catch (e) {
-    if (e instanceof Error) {
-      // Handle different error scenarios
-      if (e.status == 409) {
-        res.status(409).json({
-          title: CONTENT_EXISTS,
-          info: {
-            message: e.message,
-          },
-        });
-      } else {
-        // Internal server error for other errors
-        res.status(500).json({
-          title: CREATE_FAIL,
-          info: {
-            message: e.message,
-          },
-        });
+      res.status(201).json({
+        message: CREATE_SUCCESS,
+        newReview,
+      });
+    } catch (e) {
+      if (e instanceof Error) {
+        // Handle different error scenarios
+        if (e.status == 409) {
+          res.status(409).json({
+            title: CONTENT_EXISTS,
+            info: {
+              message: e.message,
+            },
+          });
+        } else {
+          // Internal server error for other errors
+          res.status(500).json({
+            title: CREATE_FAIL,
+            info: {
+              message: e.message,
+            },
+          });
+        }
       }
     }
   }
-});
+);
 
 //* Get all reviews for a specific book
 ReviewController.route("/get/:bookId").get(async (req, res) => {
@@ -83,11 +86,17 @@ ReviewController.route("/get/:bookId").get(async (req, res) => {
   }
 });
 
-// Update an existing review
+//* Update an existing review
 ReviewController.route("/update/:reviewId").put(async (req, res) => {
   try {
     const { reviewId } = req.params;
-    const { ...updatedReviewData } = req.body;
+    // Replace manual line breaks with '\n' escape sequence
+    const formattedComment = req.body.comment.replace(/\r?\n|\r/g, "\\n");
+
+    const updatedReviewData = {
+      rating: req.body.rating,
+      comment: formattedComment,
+    };
 
     const updatedReview = await Services.ReviewService.updateReview(
       reviewId,

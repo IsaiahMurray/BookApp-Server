@@ -48,6 +48,19 @@ const getReviewsByBookId = async (bookId) => {
 // Update an existing review
 const updateReview = async (reviewId, updatedReviewData) => {
   try {
+      // Check if the review exists
+      const existingReview = await ReviewModel.findOne({
+        where: {
+            id: reviewId
+        }
+    });
+
+    if (!existingReview) {
+        const error = new Error('Review not found');
+        error.status = 404; // Set the status code to 404 for resource not found
+        throw error;
+    }
+  
     const [rowsUpdated, [updatedReview]] = await ReviewModel.update(updatedReviewData, {
       where: { id: reviewId },
       returning: true,
