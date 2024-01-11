@@ -1,4 +1,4 @@
-const Services = require("../services/index");
+const { BookService } = require("../services/index");
 const BookController = require("express").Router();
 const { ValidateSession, ValidateAdmin } = require("../middleware");
 
@@ -21,32 +21,12 @@ BookController.route("/create").post(ValidateSession, async (req, res) => {
   try {
     //Get the user id and user inputs
     const userId = req.user.id;
-    const {
-      author,
-      title,
-      description,
-      titleFont,
-      contentFont,
-      privacy,
-      canRate,
-      rating,
-      tags,
-      canReview,
-    } = req.body;
+    const { ...bookData } = req.body;
 
     // Call the service function to create a new chapter
-    const newBook = await Services.BookService.create({
-      author,
+    const newBook = await BookService.create({
       userId,
-      title,
-      description,
-      titleFont,
-      contentFont,
-      privacy,
-      canRate,
-      rating,
-      tags,
-      canReview,
+      bookData,
     });
 
     // Respond with a success message and the newly created chapter
@@ -72,7 +52,7 @@ BookController.route("/create").post(ValidateSession, async (req, res) => {
 BookController.route("/get/all").get(async (req, res) => {
   try {
     // Call the service function to get all books
-    const allBooks = await Services.BookService.getAllBooks();
+    const allBooks = await BookService.getAllBooks();
 
     // Respond with books if found
     res.status(200).json({
@@ -110,7 +90,7 @@ BookController.route("/get/books/:userId").get(async (req, res) => {
     const userId = req.params.userId;
 
     // Fetch books associated with the user
-    const books = await Services.BookService.getBooksByUser(userId);
+    const books = await BookService.getBooksByUser(userId);
 
     // If no books found for the user, send 204 (No Content) response
     if (books.length === 0) {
@@ -137,7 +117,7 @@ BookController.route("/get/books/:userId").get(async (req, res) => {
 BookController.route("/get/:id").get(async (req, res) => {
   try {
     const { id } = req.params;
-    const book = await Services.BookService.getById(id);
+    const book = await BookService.getById(id);
 
     res.status(200).json({
       message: GET_SUCCESS,
@@ -165,7 +145,7 @@ BookController.route("/update/:bookId").put(
       const userId = req.user.id;
       const { ...updatedBookData } = req.body;
 
-      const updatedBook = await Services.BookService.modifyBook(
+      const updatedBook = await BookService.modifyBook(
         userId,
         bookId,
         updatedBookData
@@ -218,7 +198,7 @@ BookController.route("/patch/:bookId").patch(
       const { propertyName, propertyValue } = req.body;
 
       // Call the service function to edit the book
-      const updatedBook = await Services.BookService.patchBookProperty(
+      const updatedBook = await BookService.patchBookProperty(
         userId,
         bookId,
         propertyName,
@@ -273,12 +253,13 @@ BookController.route("/patch/:bookId").patch(
 //* Delete Book
 BookController.route("/delete/:bookId").delete(
   ValidateSession,
+  ValidateAdmin,
   async (req, res) => {
     try {
       const { bookId } = req.params;
-      
+
       // Call the service function to delete the book
-      const deletedBook = await Services.BookService.deleteBook(bookId);
+      const deletedBook = await BookService.deleteBook(bookId);
 
       // Respond with a success message and the deleted book
       res.status(200).json({

@@ -1,4 +1,4 @@
-const Services = require("../services/index");
+const { ChapterService } = require("../services/index");
 const ChapterController = require("express").Router();
 // Constants for error messages or success messages are imported from a separate file
 const {
@@ -22,7 +22,7 @@ ChapterController.route("/create/:bookId").post(async (req, res) => {
     const { title, content, chapterNumber } = req.body;
 
     // Call the service function to create a new chapter
-    const newChapter = await Services.ChapterService.createChapter({
+    const newChapter = await ChapterService.createChapter({
       userId,
       bookId,
       title,
@@ -65,7 +65,7 @@ ChapterController.route("/get/:bookId").get(async (req, res) => {
     const { bookId } = req.params;
 
     // Call the service function to get chapters by bookId
-    const chapters = await Services.ChapterService.getChaptersByBookId(bookId);
+    const chapters = await ChapterService.getChaptersByBookId(bookId);
 
     // Respond with chapters if found
     res.status(200).json({
@@ -104,7 +104,7 @@ ChapterController.route("/update/:chapterId").put(async (req, res) => {
     const { title, content, chapterNumber } = req.body;
 
     // Call the service function to update the chapter
-    const updatedChapter = await Services.ChapterService.updateChapter({
+    const updatedChapter = await ChapterService.updateChapter({
       chapterId,
       title,
       content,
@@ -147,9 +147,7 @@ ChapterController.route("/delete/:chapterId").delete(async (req, res) => {
     const chapterId = req.params.chapterId;
 
     // Call the service function to delete the chapter by chapterId
-    const deletedChapter = await Services.ChapterService.deleteChapter(
-      chapterId
-    );
+    const deletedChapter = await ChapterService.deleteChapter(chapterId);
 
     // Respond with a success message and the deleted chapter
     res.status(200).json({

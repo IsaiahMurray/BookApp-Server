@@ -1,5 +1,5 @@
 require("dotenv").config();
-const Services = require("../services/index");
+const { AdminService, PasswordService } = require("../services/index");
 const AdminController = require("express").Router();
 
 const {
@@ -18,17 +18,17 @@ const {
 } = require("../controllers/constants");
 const services = require("../services/index");
 
-
-
 //* Create new Admin User
- AdminController.route("/register").post(async (req, res) => {
+AdminController.route("/register").post(async (req, res) => {
   try {
     const { username, email, password } = req.body;
 
     if (!email || !password) throw new Error(INCORRECT_EMAIL_PASSWORD);
 
-    const hashedPassword = await Services.PasswordService.hashPassword(password);
-    const userId = await Services.AdminService.adminCreate({
+    const hashedPassword = await PasswordService.hashPassword(
+      password
+    );
+    const userId = await AdminService.adminCreate({
       username,
       email,
       password: hashedPassword,
@@ -57,13 +57,13 @@ const services = require("../services/index");
 //* Get all Users
 AdminController.route("/get/users").get(async (req, res) => {
   try {
-    const allUsers = await Services.AdminService.getAllUsers(); // Await here
+    const allUsers = await AdminService.getAllUsers(); // Await here
 
     res.status(200).json({
       info: {
         message: GET_SUCCESS,
-        users: allUsers
-      }
+        users: allUsers,
+      },
     });
   } catch (e) {
     if (e instanceof Error) {
@@ -78,15 +78,14 @@ AdminController.route("/get/users").get(async (req, res) => {
   }
 });
 
-
- //* Get User by ID
- AdminController.route("/get/:userId").get(async (req, res) => {
+//* Get User by ID
+AdminController.route("/get/:userId").get(async (req, res) => {
   const { userId } = req.params;
 
   try {
-    const user = await Services.AdminService.getById(userId);
+    const user = await AdminService.getById(userId);
     if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+      return res.status(404).json({ message: "User not found" });
     }
     res.json(user);
   } catch (e) {
@@ -103,16 +102,16 @@ AdminController.route("/get/users").get(async (req, res) => {
 });
 
 //* Modify role
- AdminController.route("/modify/role/:id").put(async (req, res) => {
+AdminController.route("/modify/role/:id").put(async (req, res) => {
   try {
     const { role } = req.body;
     const { id } = req.params;
-    const updatedRole = await Services.AdminService.modifyRole(id, role);
+    const updatedRole = await AdminService.modifyRole(id, role);
     res.json({
       user: updatedRole,
       info: {
         message: UPDATE_SUCCESS,
-        role: role
+        role: role,
       },
     });
   } catch (e) {
@@ -128,11 +127,11 @@ AdminController.route("/get/users").get(async (req, res) => {
   }
 });
 
-//! Delete User
- AdminController.route("/delete/:id").delete(async (req, res) => {
+//* Delete User
+AdminController.route("/delete/:id").delete(async (req, res) => {
   try {
     const { id } = req.params;
-    const destroyedUser = await Services.AdminService.remove(id);
+    const destroyedUser = await AdminService.remove(id);
 
     res.status(200).json({
       destroyedUser,
@@ -152,6 +151,5 @@ AdminController.route("/get/users").get(async (req, res) => {
     }
   }
 });
-
 
 module.exports = AdminController;

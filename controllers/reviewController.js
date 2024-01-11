@@ -1,4 +1,4 @@
-const Services = require("../services");
+const { ReviewService } = require("../services");
 const ReviewController = require("express").Router();
 const { ValidateSession, ValidateAdmin } = require("../middleware");
 const {
@@ -23,7 +23,7 @@ ReviewController.route("/create/:bookId").post(
       const { bookId } = req.params;
       const { comment, rating } = req.body;
 
-      const newReview = await Services.ReviewService.createReview(
+      const newReview = await ReviewService.createReview(
         userId,
         bookId,
         comment,
@@ -63,7 +63,7 @@ ReviewController.route("/get/:bookId").get(async (req, res) => {
   try {
     const { bookId } = req.params;
 
-    const reviews = await Services.ReviewService.getReviewsByBookId(bookId);
+    const reviews = await ReviewService.getReviewsByBookId(bookId);
 
     if (reviews.length === 0) {
       return res.status(204).end("No reviews found for the book.");
@@ -98,7 +98,7 @@ ReviewController.route("/update/:reviewId").put(async (req, res) => {
       comment: formattedComment,
     };
 
-    const updatedReview = await Services.ReviewService.updateReview(
+    const updatedReview = await ReviewService.updateReview(
       reviewId,
       updatedReviewData
     );
@@ -126,7 +126,7 @@ ReviewController.route("/patch/:reviewId").patch(async (req, res) => {
     const { reviewId } = req.params;
     const { propertyName, propertyValue } = req.body;
 
-    const patchedReview = await Services.ReviewService.patchReviewProperty(
+    const patchedReview = await ReviewService.patchReviewProperty(
       reviewId,
       propertyName,
       propertyValue
@@ -150,27 +150,30 @@ ReviewController.route("/patch/:reviewId").patch(async (req, res) => {
 });
 
 //* Delete a review
-ReviewController.route("/delete/:reviewId").delete(ValidateAdmin, async (req, res) => {
-  try {
-    const { reviewId } = req.params;
+ReviewController.route("/delete/:reviewId").delete(
+  ValidateAdmin,
+  async (req, res) => {
+    try {
+      const { reviewId } = req.params;
 
-    const deletedReview = await Services.ReviewService.deleteReview(reviewId);
+      const deletedReview = await ReviewService.deleteReview(reviewId);
 
-    res.status(200).json({
-      message: DELETE_SUCCESS,
-      deletedReview,
-    });
-  } catch (e) {
-    if (e instanceof Error) {
-      const errorMessage = {
-        title: DELETE_FAIL,
-        info: {
-          message: e.message,
-        },
-      };
-      res.status(500).json(errorMessage);
+      res.status(200).json({
+        message: DELETE_SUCCESS,
+        deletedReview,
+      });
+    } catch (e) {
+      if (e instanceof Error) {
+        const errorMessage = {
+          title: DELETE_FAIL,
+          info: {
+            message: e.message,
+          },
+        };
+        res.status(500).json(errorMessage);
+      }
     }
   }
-});
+);
 
 module.exports = ReviewController;
