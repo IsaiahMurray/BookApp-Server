@@ -12,8 +12,8 @@ ReviewModel.belongsTo(BookModel);
 UserModel.hasMany(ReviewModel);
 BookModel.hasMany(ReviewModel);
 
-ReviewModel.belongsTo(UserModel);
-ReviewModel.belongsTo(BookModel);
+ReviewModel.belongsTo(UserModel, { foreignKey: 'userId', as: 'user' });
+ReviewModel.belongsTo(BookModel, { foreignKey: 'bookId', as: 'book' });
 
 BookModel.belongsTo(UserModel, { foreignKey: 'userId' });
 ChapterModel.belongsTo(BookModel, { foreignKey: 'bookId' });
