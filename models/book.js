@@ -50,6 +50,10 @@ const BookModel = db.define('book', {
         type: DataTypes.STRING, // Store the path or URL of the profile picture
         allowNull: true, // Allow the profile picture to be optional
       },
+      allowedUsers: { // Store the IDs of users who have access to the book with the 'limited' property
+        type: DataTypes.ARRAY(DataTypes.INTEGER),
+        allowNull: true
+    },
     
 });
 
