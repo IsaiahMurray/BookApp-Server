@@ -14,6 +14,7 @@ app.use("/user", controllers.UserController);
 app.use("/admin", controllers.AdminController);
 app.use("/book", controllers.BookController);
 app.use("/chapter", middlewares.ValidateSession, controllers.ChapterController);
+app.use("/review", middlewares.ValidateSession, controllers.ReviewController);
 
 dbConnection
   .authenticate()
