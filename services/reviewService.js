@@ -3,7 +3,6 @@ const { ReviewModel, UserModel } = require('../models');
 // Create a new review
 const createReview = async (userId, bookId, comment, rating) => {
   try {
-    console.log(userId, bookId, comment, rating)
       // Check if the user has already reviewed the book
     const existingReview = await ReviewModel.findOne({
       where: {
