@@ -1,31 +1,10 @@
-const { BookModel } = require("../models");
+const { BookModel, TagModel } = require("../models");
+const { Op } = require('sequelize');
 
 //? Create Book
-const create = async ({
-  author,
-  userId,
-  title,
-  description,
-  titleFont,
-  contentFont,
-  privacy,
-  canRate,
-  tags,
-  canReview,
-}) => {
+const create = async ({ userId, bookData }) => {
   try {
-    const newBook = await BookModel.create({
-      author,
-      userId,
-      title,
-      description,
-      titleFont,
-      contentFont,
-      privacy,
-      tags,
-      canReview,
-      canRate,
-    });
+    const newBook = await BookModel.create({ userId, ...bookData });
 
     return newBook;
   } catch (e) {
@@ -93,6 +72,48 @@ const getById = async (id) => {
 
     // If the book exists, return the book object
     return book;
+  } catch (e) {
+    throw e;
+  }
+};
+
+//? Get books by tags
+const getBooksByTags = async (tags) => {
+  try {
+    // Find tags with the given names
+    const foundTags = await TagModel.findAll({
+      where: {
+        tagName: {
+          [Op.in]: tags,
+        },
+      },
+    });
+
+    // Extract tag ids
+    const tagIds = foundTags.map((tag) => tag.id);
+
+    // Find books with the extracted tag ids
+    const books = await BookModel.findAll({
+      include: [
+        {
+          model: TagModel,
+          as: 'bookTags',
+          where: {
+            id: {
+              [Op.in]: tagIds,
+            },
+          },
+        },
+      ],
+    });
+
+    if(books.length == 0){
+      const error = new Error('No books found')
+      error.status = 404;
+      throw error;
+    }
+
+    return books;
   } catch (e) {
     throw e;
   }
@@ -218,6 +239,7 @@ module.exports = {
   getBooksByUser,
   getById,
   getAllBooks,
+  getBooksByTags,
   modifyBook,
   patchBookProperty,
   deleteBook,
