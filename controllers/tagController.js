@@ -1,5 +1,6 @@
 const { TagService } = require("../services");
 const TagController = require("express").Router();
+const { ValidateAdmin } = require("../middleware");
 
 // Constants for error messages or success messages are imported from a separate file
 const {
@@ -16,7 +17,7 @@ const {
 } = require("../controllers/constants");
 
 //* Create Tag
-TagController.route("/create").post(async (req, res) => {
+TagController.route("/create").post(ValidateAdmin, async (req, res) => {
   try {
     const { tagName } = req.body;
 
@@ -84,7 +85,7 @@ TagController.route("/get").get(async (req, res) => {
 });
 
 //* Update Tag
-TagController.route('/update/:tagId').put(async (req, res) => {
+TagController.route("/update/:tagId").put(ValidateAdmin, async (req, res) => {
   try {
     const { tagId } = req.params;
     const { tagName } = req.body;
@@ -120,38 +121,41 @@ TagController.route('/update/:tagId').put(async (req, res) => {
 });
 
 //* Delete Tag
-TagController.route('/delete/:tagId').delete(async (req, res) => {
-  try {
-    const { tagId } = req.params;
+TagController.route("/delete/:tagId").delete(
+  ValidateAdmin,
+  async (req, res) => {
+    try {
+      const { tagId } = req.params;
 
-    const deletedTag = await TagService.deleteTag(tagId);
+      const deletedTag = await TagService.deleteTag(tagId);
 
-    res.status(200).json({
-      message: DELETE_SUCCESS,
-      deletedTag,
-    });
-  } catch (e) {
-    if (e instanceof Error) {
-      // Handle different error scenarios
-      if (e.status === 404) {
-        // Not Found error (if no tag found)
-        res.status(404).json({
-          title: NOT_FOUND,
-          info: {
-            message: e.message,
-          },
-        });
-      } else {
-        // Internal server error for other errors
-        res.status(500).json({
-          title: DELETE_FAIL,
-          info: {
-            message: e.message,
-          },
-        });
+      res.status(200).json({
+        message: DELETE_SUCCESS,
+        deletedTag,
+      });
+    } catch (e) {
+      if (e instanceof Error) {
+        // Handle different error scenarios
+        if (e.status === 404) {
+          // Not Found error (if no tag found)
+          res.status(404).json({
+            title: NOT_FOUND,
+            info: {
+              message: e.message,
+            },
+          });
+        } else {
+          // Internal server error for other errors
+          res.status(500).json({
+            title: DELETE_FAIL,
+            info: {
+              message: e.message,
+            },
+          });
+        }
       }
     }
   }
-});
+);
 
 module.exports = TagController;
