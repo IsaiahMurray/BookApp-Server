@@ -120,7 +120,7 @@ ReviewController.route("/update/:reviewId").put(async (req, res) => {
   }
 });
 
-// Patch a specific property of a review
+//* Patch a specific property of a review
 ReviewController.route("/patch/:reviewId").patch(async (req, res) => {
   try {
     const { reviewId } = req.params;
