@@ -21,6 +21,10 @@ const UserModel = db.define("user", {
     type: DataTypes.ENUM("admin", "user"),
     allowNull: false,
   },
+  readingList: {
+    type: DataTypes.ARRAY(DataTypes.INTEGER),
+    allowNull: true
+  },
   archiveAccount: {
     type: DataTypes.BOOLEAN,
     allowNull: false,
