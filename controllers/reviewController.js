@@ -149,8 +149,8 @@ ReviewController.route("/patch/:reviewId").patch(async (req, res) => {
   }
 });
 
-// Delete a review
-ReviewController.route("/delete/:reviewId").delete(async (req, res) => {
+//* Delete a review
+ReviewController.route("/delete/:reviewId").delete(ValidateAdmin, async (req, res) => {
   try {
     const { reviewId } = req.params;
 
