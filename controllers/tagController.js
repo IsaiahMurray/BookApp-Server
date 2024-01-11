@@ -158,21 +158,44 @@ TagController.route("/delete/:tagId").delete(
   }
 );
 
-// Remove Tags from Book
-TagController.route('/book/:bookId/tags').post( ValidateSession, ValidateAdmin, async (req, res) => {
+// Add Tags to Book
+TagController.route('/book/:bookId/tags').patch( ValidateSession, ValidateAdmin, async (req, res) => {
   try {
     const { bookId } = req.params;
     const { tagIds } = req.body;
 
     const result = await TagService.addMultipleTagsToBook(bookId, tagIds);
-    return result;
+    
+    res.status(200).json({
+      message: UPDATE_SUCCESS,
+      result,
+    });
   } catch (e) {
-    throw e;
+    if (e instanceof Error) {
+      // Handle different error scenarios
+      if (e.status === 404) {
+        // Not Found error (if no tag found)
+        res.status(404).json({
+          title: NOT_FOUND,
+          info: {
+            message: e.message,
+          },
+        });
+      } else {
+        // Internal server error for other errors
+        res.status(500).json({
+          title: DELETE_FAIL,
+          info: {
+            message: e.message,
+          },
+        });
+      }
+    }
   }
 });
 
-// Add Tags to Book
-TagController.route('/book/:bookId/tags').delete(ValidateSession, ValidateAdmin, async (req, res) => {
+// Remove Tags from Book
+TagController.route('/book/:bookId/tags').patch(ValidateSession, ValidateAdmin, async (req, res) => {
   try {
     const { bookId } = req.params;
     const { tagIds } = req.body;
@@ -180,8 +203,28 @@ TagController.route('/book/:bookId/tags').delete(ValidateSession, ValidateAdmin,
     const result = await TagService.removeMultipleTagsFromBook(bookId, tagIds);
     return result;
   } catch (e) {
-    throw e;
+    if (e instanceof Error) {
+      // Handle different error scenarios
+      if (e.status === 404) {
+        // Not Found error (if no tag found)
+        res.status(404).json({
+          title: NOT_FOUND,
+          info: {
+            message: e.message,
+          },
+        });
+      } else {
+        // Internal server error for other errors
+        res.status(500).json({
+          title: CREATE_FAIL,
+          info: {
+            message: e.message,
+          },
+        });
+      }
+    }
   }
 });
+
 
 module.exports = TagController;

@@ -40,7 +40,8 @@ const BookModel = db.define('book', {
     },
     tags: {
         type: DataTypes.ARRAY(DataTypes.INTEGER),
-        allowNull: true
+        allowNull: true,
+        defaultValue: []
     },
     canReview: {
         type: DataTypes.BOOLEAN,

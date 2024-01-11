@@ -1,5 +1,3 @@
-const TagController = require("../controllers/tagController");
-const { ValidateSession, ValidateAdmin } = require("../middleware");
 const { TagModel, BookModel } = require("../models");
 
 // Create a new tag
@@ -29,17 +27,18 @@ const createTag = async (tagName) => {
   }
 };
 
-// Get all tags
 const getAllTags = async () => {
   try {
     const tags = await TagModel.findAll();
-    // Check if no chapters were found for the given bookId
+
+    // Check if no tags were found
     if (!tags || tags.length === 0) {
-      // If no chapters are found, create an error object
+      // If no tags are found, create an error object
       const error = new Error("No tags have been created");
       error.status = 404; // Set the status code to 404 for resource not found
       throw error; // Throw the error to handle it further
     }
+
     return tags;
   } catch (e) {
     throw e;
@@ -94,23 +93,45 @@ const deleteTag = async (tagId) => {
 // Add multiple Tags to a Book
 const addMultipleTagsToBook = async (bookId, tagIds) => {
   try {
+    // Find the book
+    console.log(tagIds)
     const book = await BookModel.findByPk(bookId);
-
     if (!book) {
-      const error = new Error('Book not found');
+      const error = new Error("Book not found");
       error.status = 404;
       throw error;
     }
+  
+    
 
-    const tagsToAdd = await TagModel.findAll({
-      where: {
-        id: tagIds,
-      },
-    });
+    if (!book.tags || book.tags.length === 0) {
+      // Book has no tags
+      console.log('Book has no tags');
 
-    await book.addTags(tagsToAdd);
+      book.tags = [...tagIds];
 
-    return `Tags added to book with ID ${bookId} successfully.`;
+      console.log(book.tags)
+      const updatedBook = await book.save();
+
+      return updatedBook;
+    } else {
+      // Book has tags
+      console.log('Book has tags');
+
+      const tagArr = [...tagIds, ...book.tags];
+      updatedArr = [...new Set(tagArr)];
+
+      console.log("updatedArr");
+
+      const updatedBook = await book.save();
+
+      return updatedBook;
+    }
+
+    // Filter out dupes
+    // const names = ['John', 'Paul', 'George', 'Ringo', 'John'];
+
+    // let unique = [...new Set(names)];
   } catch (error) {
     throw error;
   }
@@ -122,7 +143,7 @@ const removeMultipleTagsFromBook = async (bookId, tagIds) => {
     const book = await BookModel.findByPk(bookId);
 
     if (!book) {
-      const error = new Error('Book not found');
+      const error = new Error("Book not found");
       error.status = 404;
       throw error;
     }
@@ -146,5 +167,5 @@ module.exports = {
   updateTag,
   deleteTag,
   addMultipleTagsToBook,
-  removeMultipleTagsFromBook
+  removeMultipleTagsFromBook,
 };
