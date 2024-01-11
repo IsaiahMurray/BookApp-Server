@@ -109,7 +109,7 @@ TagController.route('/update/:tagId').put(async (req, res) => {
       } else {
         // Internal server error for other errors
         res.status(500).json({
-          title: GET_FAIL,
+          title: UPDATE_FAIL,
           info: {
             message: e.message,
           },
@@ -144,7 +144,7 @@ TagController.route('/delete/:tagId').delete(async (req, res) => {
       } else {
         // Internal server error for other errors
         res.status(500).json({
-          title: GET_FAIL,
+          title: DELETE_FAIL,
           info: {
             message: e.message,
           },
