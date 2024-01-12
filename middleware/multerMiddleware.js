@@ -1,7 +1,6 @@
 // middleware/multerMiddleware.js
 const multer = require("multer");
 const path = require("path");
-const { UserModel } = require("../models"); // Import your UserModel
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
