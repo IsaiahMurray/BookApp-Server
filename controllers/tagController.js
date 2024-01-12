@@ -159,7 +159,7 @@ TagController.route("/delete/:tagId").delete(
 );
 
 // Add Tags to Book
-TagController.route('/book/:bookId/tags').patch( ValidateSession, ValidateAdmin, async (req, res) => {
+TagController.route('/add/:bookId/tags').patch( ValidateSession, ValidateAdmin, async (req, res) => {
   try {
     const { bookId } = req.params;
     const { tagIds } = req.body;
@@ -174,7 +174,7 @@ TagController.route('/book/:bookId/tags').patch( ValidateSession, ValidateAdmin,
     if (e instanceof Error) {
       // Handle different error scenarios
       if (e.status === 404) {
-        // Not Found error (if no tag found)
+        // Not Found error (if no book found)
         res.status(404).json({
           title: NOT_FOUND,
           info: {
@@ -195,13 +195,17 @@ TagController.route('/book/:bookId/tags').patch( ValidateSession, ValidateAdmin,
 });
 
 // Remove Tags from Book
-TagController.route('/book/:bookId/tags').patch(ValidateSession, ValidateAdmin, async (req, res) => {
+TagController.route('/remove/:bookId/tags').patch(ValidateSession, ValidateAdmin, async (req, res) => {
   try {
     const { bookId } = req.params;
     const { tagIds } = req.body;
 
     const result = await TagService.removeMultipleTagsFromBook(bookId, tagIds);
-    return result;
+    
+    res.status(200).json({
+      message: UPDATE_SUCCESS,
+      result,
+    });
   } catch (e) {
     if (e instanceof Error) {
       // Handle different error scenarios

@@ -94,44 +94,33 @@ const deleteTag = async (tagId) => {
 const addMultipleTagsToBook = async (bookId, tagIds) => {
   try {
     // Find the book
-    console.log(tagIds)
     const book = await BookModel.findByPk(bookId);
+
+    // If no book, throw not found
     if (!book) {
       const error = new Error("Book not found");
       error.status = 404;
       throw error;
     }
-  
-    
 
+    // Check if the Book has no tags or is set to null
     if (!book.tags || book.tags.length === 0) {
-      // Book has no tags
-      console.log('Book has no tags');
-
+      // Set the tags and save the Book
       book.tags = [...tagIds];
-
-      console.log(book.tags)
       const updatedBook = await book.save();
 
       return updatedBook;
     } else {
       // Book has tags
-      console.log('Book has tags');
+      // Combine the new tagIds and the current tags on the book
+      let tagArr = [...tagIds, ...book.tags];
 
-      const tagArr = [...tagIds, ...book.tags];
-      updatedArr = [...new Set(tagArr)];
-
-      console.log("updatedArr");
-
+      // Filter out any duplicates and save
+      book.tags = [...new Set(tagArr)];
       const updatedBook = await book.save();
 
       return updatedBook;
     }
-
-    // Filter out dupes
-    // const names = ['John', 'Paul', 'George', 'Ringo', 'John'];
-
-    // let unique = [...new Set(names)];
   } catch (error) {
     throw error;
   }
@@ -141,26 +130,39 @@ const addMultipleTagsToBook = async (bookId, tagIds) => {
 const removeMultipleTagsFromBook = async (bookId, tagIds) => {
   try {
     const book = await BookModel.findByPk(bookId);
-
+console.log(book)
     if (!book) {
       const error = new Error("Book not found");
       error.status = 404;
       throw error;
     }
+    
+    function removeSimilarValues(array1, array2) {
+      // Ensure both arrays are provided
+      if (!Array.isArray(array1) || !Array.isArray(array2)) {
+        throw new Error("Both parameters must be arrays");
+      }
+      
+      // Filter out values in array2 that are present in array1
+      const filteredArray2 = array2.filter((value) => !array1.includes(value));
+      
+      return filteredArray2;
+    }
+    
+    const newTags = removeSimilarValues(tagIds, book.tags);
+    console.log("new tags", newTags);
+    book.tags = [...newTags];
 
-    const tagsToRemove = await TagModel.findAll({
-      where: {
-        id: tagIds,
-      },
-    });
+    console.log("New book", book)
 
-    await book.removeTags(tagsToRemove);
+    const updatedBook = await book.save();
 
-    return `Tags removed from book with ID ${bookId} successfully.`;
+    return updatedBook;
   } catch (error) {
     throw error;
   }
 };
+
 module.exports = {
   createTag,
   getAllTags,
