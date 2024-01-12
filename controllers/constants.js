@@ -17,7 +17,8 @@ const CONFLICT = "There is a conflict with this request.";
 const NO_AUTH = "Access denied.";
 const INVALID_TOKEN = "Your token is not valid.";
 const BAD_REQ = "Bad request.";
-const NO_TOKEN = "No token provided."
+const NO_TOKEN = "No token provided.";
+const FORBIDDEN = "Forbidden."
 
 module.exports = {
     CREATE_FAIL,
@@ -39,5 +40,6 @@ module.exports = {
     INVALID_TOKEN,
     BAD_REQ,
     NO_TOKEN,
-    NO_USER
+    NO_USER,
+    FORBIDDEN
 }

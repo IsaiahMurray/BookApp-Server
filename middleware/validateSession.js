@@ -1,33 +1,48 @@
-const jwt = require("jsonwebtoken");
-const { UserModel } = require("../models");
-require("dotenv").config();
+const { NO_TOKEN, NO_USER, NO_AUTH } = require("../controllers/constants");
+const { JWTService } = require("../services");
 
-const ValidateSession = (req, res, next) => {
-  const token = req.headers.authorization;
-  if (req.method === "OPTIONS") {
-    return next();
-  } else if (!token) {
-    return res.status(403).send({ auth: false, message: "No token provided" });
-  } else {
-    jwt.verify(token, process.env.JWT_SECRET, (err, decodeToken) => {
-      if (!err && decodeToken) {
-        UserModel.findOne({
-          where: {
-            id: decodeToken.userId,
-          },
-        })
-          .then((user) => {
-            if (!user) throw err;
+const ValidateSession = async (req, res, next) => {
+  try {
+    const token = req.headers.authorization;
+    if (req.method === "OPTIONS") {
+      return next();
+    } else if (!token) {
+      const error = new Error(NO_TOKEN);
+      error.status = 403;
+      throw error;
+    } else {
+      const decodeToken = await JWTService.verifyJWT(token);
+      const user = await UserModel.findOne({
+        where: {
+          id: decodeToken.userId,
+        },
+      });
 
-            req.user = user;
-            return next();
-          })
-          .catch((err) => next(err));
-      } else {
-        req.errors = err;
-        return res.status(500).send("Not Authorized");
+      if (!user) {
+        const error = new Error(NO_USER);
+        error.status = 400;
+        throw error;
       }
-    });
+
+      req.user = user;
+      return next();
+    }
+  } catch (e) {
+    if (e instanceof jwt.JsonWebTokenError) {
+      res.status(e.status).json({
+        title: NO_AUTH,
+        info: {
+          message: e.message,
+        },
+      });
+    } else {
+      res.status(e.status).json({
+        title: NO_AUTH,
+        info: {
+          message: e.message,
+        },
+      });
+    }
   }
 };
 
