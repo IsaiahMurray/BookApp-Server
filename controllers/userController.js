@@ -1,8 +1,11 @@
 //! User Archive Account
 
-const Services = require("../services/index");
+const { UserService, PasswordService, JWTService } = require("../services");
 const UserController = require("express").Router();
-const { ValidateSession } = require("../middleware");
+const { ValidateSession, Multer } = require("../middleware");
+const { UserModel } = require("../models");
+const fs = require("fs");
+const path = require("path");
 
 // Constants for error messages or success messages are imported from a separate file
 const {
@@ -25,10 +28,8 @@ UserController.route("/register").post(async (req, res) => {
   try {
     const { username, email, password } = req.body;
 
-    const hashedPassword = await Services.PasswordService.hashPassword(
-      password
-    );
-    const userId = await Services.UserService.create({
+    const hashedPassword = await PasswordService.hashPassword(password);
+    const userId = await UserService.create({
       username,
       email,
       password: hashedPassword,
@@ -64,19 +65,14 @@ UserController.route("/login").post(async (req, res) => {
 
     if (!email || !password) throw new Error(INCORRECT_EMAIL_PASSWORD);
 
-    const foundUser = await Services.UserService.getByEmail(email);
+    const foundUser = await UserService.getByEmail(email);
 
     if (!foundUser) throw new Error(INCORRECT_EMAIL_PASSWORD);
-    if (
-      !(await Services.PasswordService.validatePassword(
-        password,
-        foundUser.password
-      ))
-    )
+    if (!(await PasswordService.validatePassword(password, foundUser.password)))
       throw new Error(INCORRECT_EMAIL_PASSWORD);
 
     const userId = foundUser?.id;
-    const token = await Services.JWTService.createSessionToken(userId);
+    const token = await JWTService.createSessionToken(userId);
 
     res.json({
       user: foundUser,
@@ -108,10 +104,7 @@ UserController.route("/update/username").put(
       const { username } = req.body;
       const { id } = req.user;
 
-      const updatedUserName = await Services.UserService.modifyUsername(
-        id,
-        username
-      );
+      const updatedUserName = await UserService.modifyUsername(id, username);
       res.json({
         user: updatedUserName,
         info: {
@@ -140,7 +133,7 @@ UserController.route("/update/email").put(ValidateSession, async (req, res) => {
     // Return updated email and success message upon successful update
     const { email } = req.body;
     const { id } = req.user;
-    const updatedUserEmail = await Services.UserService.modifyEmail(id, email);
+    const updatedUserEmail = await UserService.modifyEmail(id, email);
     res.json({
       user: updatedUserEmail,
       info: {
@@ -171,10 +164,8 @@ UserController.route("/update/password").put(
     try {
       const { password } = req.body;
       const { id } = req.user;
-      const hashedPassword = await Services.PasswordService.hashPassword(
-        password
-      );
-      const updatedUserPass = await Services.UserService.modifyPassword(
+      const hashedPassword = await PasswordService.hashPassword(password);
+      const updatedUserPass = await UserService.modifyPassword(
         id,
         hashedPassword
       );
@@ -207,7 +198,7 @@ UserController.route("/delete").delete(ValidateSession, async (req, res) => {
   // Return success message upon successful account deletion
   try {
     const { id } = req.user;
-    const destroyedUser = await Services.UserService.remove(id);
+    const destroyedUser = await UserService.remove(id);
 
     res.status(200).json({
       destroyedUser,
@@ -228,4 +219,82 @@ UserController.route("/delete").delete(ValidateSession, async (req, res) => {
   }
 });
 
+//* Upload Profile Picture
+UserController.route("/upload/profile-picture").patch(
+  ValidateSession,
+  Multer.single("profilePicture"),
+  async (req, res) => {
+    try {
+      // Assuming you have a user ID available (maybe from authentication middleware)
+      const userId = req.user.id;
+
+      // Update the user's profilePicture in the database
+      const uploadedPic = await UserService.uploadProfilePicture(
+        userId,
+        req.file.path
+      );
+
+      res.status(200).json({
+        uploadedPic,
+        info: {
+          message: UPDATE_SUCCESS,
+        },
+      });
+    } catch (e) {
+      if (e instanceof Error) {
+        const errorMessage = {
+          title: UPDATE_FAIL,
+          info: {
+            message: e.message,
+          },
+        };
+        res.send(errorMessage);
+      }
+    }
+  }
+);
+
+//* Remove Profile Picture
+UserController.route("/remove/profile-picture").patch(
+  ValidateSession,
+  async (req, res) => {
+    try {
+      // Assuming you have a user ID available (maybe from authentication middleware)
+      const userId = req.user.id;
+
+      // Find the user to get the previous profile picture path
+      const user = await UserModel.findByPk(userId);
+
+      // Check if the user has a previous profile picture
+      if (user && user.profilePicture) {
+        // Define the path to the uploads folder
+        const uploadsFolderPath = path.join(__dirname, '..', 'uploads');
+        
+        // Remove the previous profile picture file from the uploads folder
+        const previousProfilePicturePath = path.join(uploadsFolderPath, user.profilePicture);
+        fs.unlinkSync(previousProfilePicturePath);
+      }
+
+      // Remove the user's profilePicture in the database
+      const removedPic = await UserService.removeProfilePicture(userId);
+
+      res.status(200).json({
+        removedPic,
+        info: {
+          message: UPDATE_SUCCESS,
+        },
+      });
+    } catch (e) {
+      if (e instanceof Error) {
+        const errorMessage = {
+          title: UPDATE_FAIL,
+          info: {
+            message: e.message,
+          },
+        };
+        res.send(errorMessage);
+      }
+    }
+  }
+);
 module.exports = UserController;

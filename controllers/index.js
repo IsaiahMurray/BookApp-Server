@@ -5,4 +5,5 @@ module.exports ={
     ChapterController: require('./chapterController'),
     ReviewController: require('./reviewController'),
     TagController: require('./tagController'),
+    ImgController: require('./imageController')
 };

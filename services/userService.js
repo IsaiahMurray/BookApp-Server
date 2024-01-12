@@ -98,6 +98,35 @@ const remove = async (id) => {
   }
 };
 
+//? Upload Profile Picture
+const uploadProfilePicture = async (userId, filePath) => {
+  try {
+    const uploaded = await UserModel.update(
+      { profilePicture: filePath },
+      { where: { id: userId } }
+    );
+
+    return uploaded;
+  } catch (e) {
+    throw e;
+  }
+};
+
+//? Remove Profile Picture
+const removeProfilePicture = async (userId) => {
+  try {
+    // Remove the user's profilePicture in the database
+    const removedPicture = await UserModel.update(
+      { profilePicture: null },
+      { where: { id: userId } }
+    );
+
+    return removedPicture;
+  } catch (e) {
+    throw e;
+  }
+};
+
 module.exports = {
   create,
   getByEmail,
@@ -105,4 +134,6 @@ module.exports = {
   modifyEmail,
   modifyPassword,
   remove,
+  uploadProfilePicture,
+  removeProfilePicture
 };
