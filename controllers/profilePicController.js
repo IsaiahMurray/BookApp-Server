@@ -1,6 +1,6 @@
 const multer = require('multer');
 const path = require('path');
-const UserModel = require('..models/'); // Assuming your User model is imported here
+const {UserModel} = require('..models/'); // Assuming your User model is imported here
 
 // Multer configuration for file upload
 const storage = multer.diskStorage({

@@ -158,7 +158,7 @@ TagController.route("/delete/:tagId").delete(
   }
 );
 
-// Add Tags to Book
+//* Add Tags to Book
 TagController.route('/add/:bookId/tags').patch( ValidateSession, ValidateAdmin, async (req, res) => {
   try {
     const { bookId } = req.params;
@@ -194,14 +194,14 @@ TagController.route('/add/:bookId/tags').patch( ValidateSession, ValidateAdmin, 
   }
 });
 
-// Remove Tags from Book
+//* Remove Tags from Book
 TagController.route('/remove/:bookId/tags').patch(ValidateSession, ValidateAdmin, async (req, res) => {
   try {
     const { bookId } = req.params;
     const { tagIds } = req.body;
 
     const result = await TagService.removeMultipleTagsFromBook(bookId, tagIds);
-    
+
     res.status(200).json({
       message: UPDATE_SUCCESS,
       result,
