@@ -18,7 +18,8 @@ const NO_AUTH = "Access denied.";
 const INVALID_TOKEN = "Your token is not valid.";
 const BAD_REQ = "Bad request.";
 const NO_TOKEN = "No token provided.";
-const FORBIDDEN = "Forbidden."
+const FORBIDDEN = "Forbidden.";
+const NO_CONTENT = "No content found for this request";
 
 module.exports = {
     CREATE_FAIL,
