@@ -1,5 +1,6 @@
 const { NO_TOKEN, NO_USER, NO_AUTH } = require("../controllers/constants");
 const { JWTService } = require("../services");
+const { UserModel } = require("../models");
 
 const ValidateSession = async (req, res, next) => {
   try {
@@ -28,15 +29,9 @@ const ValidateSession = async (req, res, next) => {
       return next();
     }
   } catch (e) {
-    if (e instanceof jwt.JsonWebTokenError) {
-      res.status(e.status).json({
-        title: NO_AUTH,
-        info: {
-          message: e.message,
-        },
-      });
-    } else {
-      res.status(e.status).json({
+    if (e instanceof Error) {
+      const statusCode = e.status || 500;
+      res.status(statusCode).json({
         title: NO_AUTH,
         info: {
           message: e.message,
