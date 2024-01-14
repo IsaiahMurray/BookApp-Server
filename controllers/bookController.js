@@ -1,6 +1,9 @@
 const { BookService } = require("../services/index");
 const BookController = require("express").Router();
-const { ValidateSession, ValidateAdmin } = require("../middleware");
+const { ValidateSession, ValidateAdmin, Multer } = require("../middleware");
+const fs = require("fs");
+const path = require("path");
+const { handleErrorResponse } = require("../services/helpers/errorHandler");
 
 // Constants for error messages or success messages are imported from a separate file
 const {
@@ -15,6 +18,9 @@ const {
   NO_AUTH,
   BAD_REQ,
 } = require("../controllers/constants");
+const { BookModel } = require("../models");
+const { errorHandler } = require("../services/helpers");
+const { NOTFOUND } = require("dns");
 
 //* Create Book
 BookController.route("/create").post(ValidateSession, async (req, res) => {
@@ -37,13 +43,7 @@ BookController.route("/create").post(ValidateSession, async (req, res) => {
   } catch (e) {
     //Handle error
     if (e instanceof Error) {
-      const errorMessage = {
-        title: CREATE_FAIL,
-        info: {
-          message: e.message,
-        },
-      };
-      res.status(500).send(errorMessage);
+      handleErrorResponse(res, 500, CREATE_FAIL, e.message);
     }
   }
 });
@@ -64,20 +64,10 @@ BookController.route("/get/all").get(async (req, res) => {
       // Handle different error scenarios
       if (e.status === 404) {
         // Not Found error (if no books found)
-        res.status(404).json({
-          title: NOT_FOUND,
-          info: {
-            message: e.message,
-          },
-        });
+        handleErrorResponse(res, 404, NOTFOUND, e.message);
       } else {
         // Internal server error for other errors
-        res.status(500).json({
-          title: GET_FAIL,
-          info: {
-            message: e.message,
-          },
-        });
+        handleErrorResponse(res, 500, GET_FAIL, e.message);
       }
     }
   }
@@ -94,22 +84,17 @@ BookController.route("/get/books/:userId").get(async (req, res) => {
 
     // If no books found for the user, send 204 (No Content) response
     if (books.length === 0) {
-      return res.status(204).end("No books found for the user.");
+      handleErrorResponse(res, 204, NO_CONTENT, NO_CONTENT);
     }
 
     // If books are found, send a JSON response with the books
     res.status(200).json({
-      message: "Books retrieved successfully",
+      message: GET_SUCCESS,
       books,
     });
   } catch (error) {
     // Handle any caught errors
-    res.status(500).json({
-      title: "Failed to retrieve books",
-      info: {
-        message: error.message,
-      },
-    });
+    handleErrorResponse(res, 500, GET_FAIL, e.message);
   }
 });
 
@@ -137,15 +122,15 @@ BookController.route("/get/:id").get(async (req, res) => {
 });
 
 //* Get Books by tags
-BookController.route('/get-tags').get(async (req, res) => {
+BookController.route("/get-tags").get(async (req, res) => {
   try {
     const { tags } = req.query;
 
     if (!tags || !Array.isArray(tags)) {
       return res.status(400).json({
-        title: 'Invalid request',
+        title: "Invalid request",
         info: {
-          message: 'Tags parameter must be an array',
+          message: "Tags parameter must be an array",
         },
       });
     }
@@ -322,4 +307,126 @@ BookController.route("/delete/:bookId").delete(
     }
   }
 );
+
+//* Upload Book Cover Picture
+BookController.route("/upload/cover-picture/:bookId").patch(
+  ValidateSession,
+  Multer.single("bookCover"),
+  async (req, res) => {
+    try {
+      const userId = req.user.id;
+      const { bookId } = req.params;
+
+      // Update the user's profilePicture in the database
+      const uploadedPic = await BookService.uploadCoverPicture(
+        bookId,
+        req.file.path
+      );
+
+      res.status(200).json({
+        uploadedPic,
+        info: {
+          message: UPDATE_SUCCESS,
+        },
+      });
+    } catch (e) {
+      if (e instanceof Error) {
+        const errorMessage = {
+          title: UPDATE_FAIL,
+          info: {
+            message: e.message,
+          },
+        };
+        res.send(errorMessage);
+      }
+    }
+  }
+);
+
+//* Remove Book Cover Picture
+BookController.route("/remove/cover-picture/:bookId").patch(
+  ValidateSession,
+  async (req, res) => {
+    try {
+      const userId = req.user.id;
+      const { bookId } = req.params;
+
+      const book = await BookModel.findByPk(bookId);
+
+      if (book && book.coverPicture) {
+        const uploadsFolderPath = path.join(__dirname, "..");
+
+        const previousProfilePicturePath = path.join(
+          uploadsFolderPath,
+          book.coverPicture
+        );
+
+        console.log(
+          "Previous Profile Picture Path:",
+          previousProfilePicturePath
+        );
+
+        // Check if the previous profile picture file exists
+        if (fs.existsSync(previousProfilePicturePath)) {
+          // Remove the previous profile picture file from the uploads folder
+          fs.unlinkSync(previousProfilePicturePath);
+
+          // Call the service function to remove the cover picture from the database
+          const removedPic = await BookService.removeCoverPicture(bookId);
+
+          // Check if the profilePicture has been set to null in the model
+          const updatedBook = await BookModel.findByPk(bookId);
+          if (updatedBook && updatedBook.coverPicture === null) {
+            res.status(200).json({
+              removedPic,
+              info: {
+                message: UPDATE_SUCCESS,
+              },
+            });
+          } else {
+            // If the profilePicture is not set to null in the model, handle accordingly
+            res.status(500).json({
+              title: UPDATE_FAIL,
+              info: {
+                message: "Failed to update profile picture in the database.",
+              },
+            });
+          }
+        } else {
+          // If the file in the uploads folder doesn't exist, handle accordingly
+          console.log(
+            "Files in uploads folder:",
+            fs.readdirSync(uploadsFolderPath)
+          );
+          res.status(404).json({
+            title: UPDATE_FAIL,
+            info: {
+              message: "File not found in the uploads folder.",
+            },
+          });
+        }
+      } else {
+        // If book or coverPicture is not found, handle accordingly
+        res.status(404).json({
+          title: UPDATE_FAIL,
+          info: {
+            message: "Book or cover picture not found.",
+          },
+        });
+      }
+    } catch (e) {
+      // Handle other errors
+      if (e instanceof Error) {
+        const errorMessage = {
+          title: UPDATE_FAIL,
+          info: {
+            message: e.message,
+          },
+        };
+        res.status(500).json(errorMessage);
+      }
+    }
+  }
+);
+
 module.exports = BookController;
