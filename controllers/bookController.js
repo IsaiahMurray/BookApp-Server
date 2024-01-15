@@ -3,7 +3,8 @@ const BookController = require("express").Router();
 const { ValidateSession, ValidateAdmin, Multer } = require("../middleware");
 const fs = require("fs");
 const path = require("path");
-const { handleErrorResponse } = require("../services/helpers/errorHandler");
+const { handleErrorResponse, handleSuccessResponse } = require("../services/helpers/errorHandler");
+const { BookModel } = require("../models");
 
 // Constants for error messages or success messages are imported from a separate file
 const {
@@ -17,10 +18,8 @@ const {
   DELETE_SUCCESS,
   NO_AUTH,
   BAD_REQ,
+  NOT_FOUND,
 } = require("../controllers/constants");
-const { BookModel } = require("../models");
-const { errorHandler } = require("../services/helpers");
-const { NOTFOUND } = require("dns");
 
 //* Create Book
 BookController.route("/create").post(ValidateSession, async (req, res) => {
@@ -36,10 +35,7 @@ BookController.route("/create").post(ValidateSession, async (req, res) => {
     });
 
     // Respond with a success message and the newly created chapter
-    res.status(201).json({
-      message: CREATE_SUCCESS,
-      newBook,
-    });
+    handleSuccessResponse(res, 201, newBook, CREATE_SUCCESS)
   } catch (e) {
     //Handle error
     if (e instanceof Error) {
@@ -55,10 +51,7 @@ BookController.route("/get/all").get(async (req, res) => {
     const allBooks = await BookService.getAllBooks();
 
     // Respond with books if found
-    res.status(200).json({
-      message: GET_SUCCESS,
-      allBooks,
-    });
+    handleSuccessResponse(res, 200, allBooks, GET_SUCCESS);
   } catch (e) {
     if (e instanceof Error) {
       // Handle different error scenarios
@@ -84,14 +77,11 @@ BookController.route("/get/books/:userId").get(async (req, res) => {
 
     // If no books found for the user, send 204 (No Content) response
     if (books.length === 0) {
-      handleErrorResponse(res, 204, NO_CONTENT, NO_CONTENT);
+      handleSuccessResponse(res, 204, NO_CONTENT, NO_CONTENT);
     }
 
     // If books are found, send a JSON response with the books
-    res.status(200).json({
-      message: GET_SUCCESS,
-      books,
-    });
+    handleSuccessResponse(res, 200, books, GET_SUCCESS)
   } catch (error) {
     // Handle any caught errors
     handleErrorResponse(res, 500, GET_FAIL, e.message);
@@ -104,19 +94,10 @@ BookController.route("/get/:id").get(async (req, res) => {
     const { id } = req.params;
     const book = await BookService.getById(id);
 
-    res.status(200).json({
-      message: GET_SUCCESS,
-      book,
-    });
+    handleSuccessResponse(res, 200, book, GET_SUCCESS);
   } catch (e) {
     if (e instanceof Error) {
-      const errorMessage = {
-        title: GET_FAIL,
-        info: {
-          message: e.message,
-        },
-      };
-      res.status(500).send(errorMessage);
+      handleErrorResponse(res, 500, GET_FAIL, e.message);
     }
   }
 });
@@ -127,28 +108,15 @@ BookController.route("/get-tags").get(async (req, res) => {
     const { tags } = req.query;
 
     if (!tags || !Array.isArray(tags)) {
-      return res.status(400).json({
-        title: "Invalid request",
-        info: {
-          message: "Tags parameter must be an array",
-        },
-      });
+      handleErrorResponse(res, 400, BAD_REQ, "Tags parameter must be an array");
     }
 
     const books = await BookService.getBooksByTags(tags);
 
-    res.status(200).json({
-      message: GET_SUCCESS,
-      books,
-    });
+    handleSuccessResponse(res, 200, books, GET_SUCCESS)
   } catch (e) {
     if (e instanceof Error) {
-      res.status(500).json({
-        title: GET_FAIL,
-        info: {
-          message: e.message,
-        },
-      });
+      handleErrorResponse(res, 500, GET_FAIL, e.message)
     }
   }
 });
@@ -168,37 +136,19 @@ BookController.route("/update/:bookId").put(
         updatedBookData
       );
 
-      res.status(200).json({
-        message: UPDATE_SUCCESS,
-        updatedBook,
-      });
+      handleSuccessResponse(res, 200, updatedBook, UPDATE_SUCCESS);
     } catch (e) {
       if (e instanceof Error) {
         // Handle different error scenarios
         if (e.status === 404) {
           // Not Found error (if the book doesn't exist)
-          res.status(404).json({
-            title: NOT_FOUND,
-            info: {
-              message: e.message,
-            },
-          });
+          handleErrorResponse(res, 404, NOT_FOUND, e.message);
         } else if (e.status === 403) {
           // Not Authorized error (if the book doesn't belong to the user)
-          res.status(403).json({
-            title: NO_AUTH,
-            info: {
-              message: e.message,
-            },
-          });
+          handleErrorResponse(res, 403, NO_AUTH, e.message);
         } else {
           // Internal server error for other errors
-          res.status(500).json({
-            title: DELETE_FAIL,
-            info: {
-              message: e.message,
-            },
-          });
+          handleErrorResponse(res, 500, UPDATE_FAIL, e.message);
         }
       }
     }
@@ -222,45 +172,22 @@ BookController.route("/patch/:bookId").patch(
         propertyValue
       );
       // Respond with a success message and the updated book
-      res.status(200).json({
-        message: UPDATE_SUCCESS,
-        updatedBook,
-      });
+      handleSuccessResponse(res, 200, updatedBook, UPDATE_SUCCESS);
     } catch (e) {
       if (e instanceof Error) {
         // Handle different error scenarios
         if (e.status === 404) {
           // Not Found error (if the book doesn't exist)
-          res.status(404).json({
-            title: NOT_FOUND,
-            info: {
-              message: e.message,
-            },
-          });
+          handleErrorResponse(res, 404, NOT_FOUND, e.message);
         } else if (e.status === 403) {
           // Not Authorized error (if the book doesn't belong to the user)
-          res.status(403).json({
-            title: NO_AUTH,
-            info: {
-              message: e.message,
-            },
-          });
+          handleErrorResponse(res, 403, NO_AUTH, e.message);
         } else if (e.status === 400) {
           // Bad Request error (if the book property doesn't exist or is misspelled)
-          res.status(400).json({
-            title: BAD_REQ,
-            info: {
-              message: e.message,
-            },
-          });
+          handleErrorResponse(res, 400, BAD_REQ, e.message);
         } else {
           // Internal server error for other errors
-          res.status(500).json({
-            title: DELETE_FAIL,
-            info: {
-              message: e.message,
-            },
-          });
+          handleErrorResponse(res, 500, DELETE_FAIL, e.message);
         }
       }
     }
@@ -279,29 +206,16 @@ BookController.route("/delete/:bookId").delete(
       const deletedBook = await BookService.deleteBook(bookId);
 
       // Respond with a success message and the deleted book
-      res.status(200).json({
-        message: DELETE_SUCCESS,
-        deletedBook,
-      });
+      handleSuccessResponse(res, 200, deletedBook, DELETE_SUCCESS);
     } catch (e) {
       if (e instanceof Error) {
         // Handle different error scenarios
         if (e.status === 404) {
           // Not Found error (if the book doesn't exist)
-          res.status(404).json({
-            title: NOT_FOUND,
-            info: {
-              message: e.message,
-            },
-          });
+          handleErrorResponse(res, 404, NOT_FOUND, e.message);
         } else {
           // Internal server error for other errors
-          res.status(500).json({
-            title: DELETE_FAIL,
-            info: {
-              message: e.message,
-            },
-          });
+          handleErrorResponse(res, 500, DELETE_FAIL, e.message);
         }
       }
     }
@@ -314,7 +228,6 @@ BookController.route("/upload/cover-picture/:bookId").patch(
   Multer.single("bookCover"),
   async (req, res) => {
     try {
-      const userId = req.user.id;
       const { bookId } = req.params;
 
       // Update the user's profilePicture in the database
@@ -323,21 +236,10 @@ BookController.route("/upload/cover-picture/:bookId").patch(
         req.file.path
       );
 
-      res.status(200).json({
-        uploadedPic,
-        info: {
-          message: UPDATE_SUCCESS,
-        },
-      });
+      handleSuccessResponse(res, 200, uploadedPic, UPDATE_SUCCESS);
     } catch (e) {
       if (e instanceof Error) {
-        const errorMessage = {
-          title: UPDATE_FAIL,
-          info: {
-            message: e.message,
-          },
-        };
-        res.send(errorMessage);
+        handleErrorResponse(res, 500, UPDATE_FAIL, e.message);
       }
     }
   }
@@ -348,7 +250,6 @@ BookController.route("/remove/cover-picture/:bookId").patch(
   ValidateSession,
   async (req, res) => {
     try {
-      const userId = req.user.id;
       const { bookId } = req.params;
 
       const book = await BookModel.findByPk(bookId);
@@ -377,20 +278,10 @@ BookController.route("/remove/cover-picture/:bookId").patch(
           // Check if the profilePicture has been set to null in the model
           const updatedBook = await BookModel.findByPk(bookId);
           if (updatedBook && updatedBook.coverPicture === null) {
-            res.status(200).json({
-              removedPic,
-              info: {
-                message: UPDATE_SUCCESS,
-              },
-            });
+            handleSuccessResponse(res, 200, removedPic, UPDATE_SUCCESS);
           } else {
             // If the profilePicture is not set to null in the model, handle accordingly
-            res.status(500).json({
-              title: UPDATE_FAIL,
-              info: {
-                message: "Failed to update profile picture in the database.",
-              },
-            });
+            handleErrorResponse(res, 500, UPDATE_FAIL, e.message);
           }
         } else {
           // If the file in the uploads folder doesn't exist, handle accordingly
@@ -398,32 +289,16 @@ BookController.route("/remove/cover-picture/:bookId").patch(
             "Files in uploads folder:",
             fs.readdirSync(uploadsFolderPath)
           );
-          res.status(404).json({
-            title: UPDATE_FAIL,
-            info: {
-              message: "File not found in the uploads folder.",
-            },
-          });
+          handleErrorResponse(res, 404, NOT_FOUND, "File not found in the uploads folder.");
         }
       } else {
         // If book or coverPicture is not found, handle accordingly
-        res.status(404).json({
-          title: UPDATE_FAIL,
-          info: {
-            message: "Book or cover picture not found.",
-          },
-        });
+        handleErrorResponse(res, 404, NOT_FOUND, "Book or cover picture not found.");
       }
     } catch (e) {
       // Handle other errors
       if (e instanceof Error) {
-        const errorMessage = {
-          title: UPDATE_FAIL,
-          info: {
-            message: e.message,
-          },
-        };
-        res.status(500).json(errorMessage);
+        handleErrorResponse(res, 500, UPDATE_FAIL, e.message);
       }
     }
   }

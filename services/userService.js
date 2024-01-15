@@ -115,7 +115,7 @@ const uploadProfilePicture = async (userId, filePath) => {
 //? Remove Profile Picture
 const removeProfilePicture = async (userId) => {
   try {
-    // Remove the user's profilePicture in the database
+    // Remove the user's profilePicture by setting the value to null
     const removedPicture = await UserModel.update(
       { profilePicture: null },
       { where: { id: userId } }

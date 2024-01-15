@@ -7,4 +7,10 @@ const handleErrorResponse = (res, status, title, message) => {
   });
 };
 
-module.exports = { handleErrorResponse };
+const handleSuccessResponse = (res, status, content, message) => {
+  res.status(status).json({
+    message: message,
+    content,
+  });
+}
+module.exports = { handleErrorResponse, handleSuccessResponse };

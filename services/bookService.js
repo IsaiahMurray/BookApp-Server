@@ -1,5 +1,5 @@
 const { BookModel, TagModel } = require("../models");
-const { Op } = require('sequelize');
+const { Op } = require("sequelize");
 
 //? Create Book
 const create = async ({ userId, bookData }) => {
@@ -97,7 +97,7 @@ const getBooksByTags = async (tags) => {
       include: [
         {
           model: TagModel,
-          as: 'bookTags',
+          as: "bookTags",
           where: {
             id: {
               [Op.in]: tagIds,
@@ -107,8 +107,8 @@ const getBooksByTags = async (tags) => {
       ],
     });
 
-    if(books.length == 0){
-      const error = new Error('No books found')
+    if (books.length == 0) {
+      const error = new Error("No books found");
       error.status = 404;
       throw error;
     }
@@ -234,6 +234,35 @@ const deleteBook = async (bookId) => {
   }
 };
 
+//? Upload Cover Picture
+const uploadCoverPicture = async (bookId, filePath) => {
+  try {
+    const uploaded = await BookModel.update(
+      { coverPicture: filePath },
+      { where: { id: bookId } }
+    );
+
+    return uploaded;
+  } catch (e) {
+    throw e;
+  }
+};
+
+//? Remove Cover Picture
+const removeCoverPicture = async (bookId) => {
+  try {
+    // Remove the cover picture by setting the value to null
+    const removedPicture = await BookModel.update(
+      { coverPicture: null },
+      { where: { id: bookId } }
+    );
+
+    return removedPicture;
+  } catch (e) {
+    throw e;
+  }
+};
+
 module.exports = {
   create,
   getBooksByUser,
@@ -243,4 +272,6 @@ module.exports = {
   modifyBook,
   patchBookProperty,
   deleteBook,
+  uploadCoverPicture,
+  removeCoverPicture,
 };
