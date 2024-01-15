@@ -4,6 +4,10 @@ const { UserService, PasswordService, JWTService } = require("../services");
 const UserController = require("express").Router();
 const { ValidateSession, Multer } = require("../middleware");
 const { UserModel } = require("../models");
+const {
+  handleErrorResponse,
+  handleSuccessResponse,
+} = require("../services/helpers/responseHandler");
 const fs = require("fs");
 const path = require("path");
 
@@ -200,21 +204,10 @@ UserController.route("/delete").delete(ValidateSession, async (req, res) => {
     const { id } = req.user;
     const destroyedUser = await UserService.remove(id);
 
-    res.status(200).json({
-      destroyedUser,
-      info: {
-        message: DELETE_SUCCESS,
-      },
-    });
+    handleSuccessResponse(res, 200, destroyedUser, DELETE_SUCCESS);
   } catch (e) {
     if (e instanceof Error) {
-      const errorMessage = {
-        title: DELETE_FAIL,
-        info: {
-          message: e.message,
-        },
-      };
-      res.send(errorMessage);
+      handleErrorResponse(res, res.status, DELETE_FAIL, e.message);
     }
   }
 });
@@ -234,21 +227,10 @@ UserController.route("/upload/profile-picture").patch(
         req.file.path
       );
 
-      res.status(200).json({
-        uploadedPic,
-        info: {
-          message: UPDATE_SUCCESS,
-        },
-      });
+      handleSuccessResponse(res, 200, uploadedPic, UPDATE_SUCCESS);
     } catch (e) {
       if (e instanceof Error) {
-        const errorMessage = {
-          title: UPDATE_FAIL,
-          info: {
-            message: e.message,
-          },
-        };
-        res.send(errorMessage);
+        handleErrorResponse(res, res.status, UPDATE_FAIL, e.message);
       }
     }
   }
@@ -268,31 +250,33 @@ UserController.route("/remove/profile-picture").patch(
       // Check if the user has a previous profile picture
       if (user && user.profilePicture) {
         // Define the path to the uploads folder
-        const uploadsFolderPath = path.join(__dirname, '..', 'uploads');
-        
+        const uploadsFolderPath = path.join(__dirname, "..");
+
         // Remove the previous profile picture file from the uploads folder
-        const previousProfilePicturePath = path.join(uploadsFolderPath, user.profilePicture);
+        const previousProfilePicturePath = path.join(
+          uploadsFolderPath,
+          user.profilePicture
+        );
         fs.unlinkSync(previousProfilePicturePath);
+        // Remove the user's profilePicture in the database
+        const removedPic = await UserService.removeProfilePicture(userId);
+
+        // Check if the cover picturehas been set to null in the model
+        const updatedUser = await UserModel.findByPk(userId);
+
+        if (updatedUser && updatedUser.profilePicture === null) {
+          handleSuccessResponse(res, 200, removedPic, UPDATE_SUCCESS);
+        } else {
+          // If the profilePicture is not set to null in the model, handle accordingly
+          handleErrorResponse(res, 500, UPDATE_FAIL, e.message);
+        }
+      } else {
+        // If book or coverPicture is not found, handle accordingly
+        handleErrorResponse(res, 404, NOT_FOUND, "Profile picture not found.");
       }
-
-      // Remove the user's profilePicture in the database
-      const removedPic = await UserService.removeProfilePicture(userId);
-
-      res.status(200).json({
-        removedPic,
-        info: {
-          message: UPDATE_SUCCESS,
-        },
-      });
     } catch (e) {
       if (e instanceof Error) {
-        const errorMessage = {
-          title: UPDATE_FAIL,
-          info: {
-            message: e.message,
-          },
-        };
-        res.send(errorMessage);
+        handleErrorResponse(res, res.status, UPDATE_FAIL, e.message);
       }
     }
   }

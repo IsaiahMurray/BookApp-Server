@@ -3,7 +3,10 @@ const BookController = require("express").Router();
 const { ValidateSession, ValidateAdmin, Multer } = require("../middleware");
 const fs = require("fs");
 const path = require("path");
-const { handleErrorResponse, handleSuccessResponse } = require("../services/helpers/errorHandler");
+const {
+  handleErrorResponse,
+  handleSuccessResponse,
+} = require("../services/helpers/responseHandler");
 const { BookModel } = require("../models");
 
 // Constants for error messages or success messages are imported from a separate file
@@ -35,7 +38,7 @@ BookController.route("/create").post(ValidateSession, async (req, res) => {
     });
 
     // Respond with a success message and the newly created chapter
-    handleSuccessResponse(res, 201, newBook, CREATE_SUCCESS)
+    handleSuccessResponse(res, 201, newBook, CREATE_SUCCESS);
   } catch (e) {
     //Handle error
     if (e instanceof Error) {
@@ -81,7 +84,7 @@ BookController.route("/get/books/:userId").get(async (req, res) => {
     }
 
     // If books are found, send a JSON response with the books
-    handleSuccessResponse(res, 200, books, GET_SUCCESS)
+    handleSuccessResponse(res, 200, books, GET_SUCCESS);
   } catch (error) {
     // Handle any caught errors
     handleErrorResponse(res, 500, GET_FAIL, e.message);
@@ -97,6 +100,9 @@ BookController.route("/get/:id").get(async (req, res) => {
     handleSuccessResponse(res, 200, book, GET_SUCCESS);
   } catch (e) {
     if (e instanceof Error) {
+      if(e.status == 404){
+        handleErrorResponse(res, 404, NOT_FOUND, e.message);
+      }
       handleErrorResponse(res, 500, GET_FAIL, e.message);
     }
   }
@@ -113,10 +119,16 @@ BookController.route("/get-tags").get(async (req, res) => {
 
     const books = await BookService.getBooksByTags(tags);
 
-    handleSuccessResponse(res, 200, books, GET_SUCCESS)
+    if (books.length == 0) {
+      handleSuccessResponse(res, 204, books, NO_CONTENT);
+    }
+    handleSuccessResponse(res, 200, books, GET_SUCCESS);
   } catch (e) {
     if (e instanceof Error) {
-      handleErrorResponse(res, 500, GET_FAIL, e.message)
+      if (res.status == 404) {
+      } else {
+        handleErrorResponse(res, 500, GET_FAIL, e.message);
+      }
     }
   }
 });
@@ -262,11 +274,6 @@ BookController.route("/remove/cover-picture/:bookId").patch(
           book.coverPicture
         );
 
-        console.log(
-          "Previous Profile Picture Path:",
-          previousProfilePicturePath
-        );
-
         // Check if the previous profile picture file exists
         if (fs.existsSync(previousProfilePicturePath)) {
           // Remove the previous profile picture file from the uploads folder
@@ -289,11 +296,21 @@ BookController.route("/remove/cover-picture/:bookId").patch(
             "Files in uploads folder:",
             fs.readdirSync(uploadsFolderPath)
           );
-          handleErrorResponse(res, 404, NOT_FOUND, "File not found in the uploads folder.");
+          handleErrorResponse(
+            res,
+            404,
+            NOT_FOUND,
+            "File not found in the uploads folder."
+          );
         }
       } else {
         // If book or coverPicture is not found, handle accordingly
-        handleErrorResponse(res, 404, NOT_FOUND, "Book or cover picture not found.");
+        handleErrorResponse(
+          res,
+          404,
+          NOT_FOUND,
+          "Book or cover picture not found."
+        );
       }
     } catch (e) {
       // Handle other errors

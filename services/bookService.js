@@ -42,14 +42,6 @@ const getBooksByUser = async (id) => {
       },
     });
 
-    // Check if there are no books found for the user
-    if (!userBooks || userBooks.length === 0) {
-      // If no books found, throw a 404 error
-      const error = new Error(`No books found for user with ID ${id}`);
-      error.status = 404;
-      throw error;
-    }
-
     return userBooks;
   } catch (e) {
     throw e;
@@ -107,12 +99,6 @@ const getBooksByTags = async (tags) => {
       ],
     });
 
-    if (books.length == 0) {
-      const error = new Error("No books found");
-      error.status = 404;
-      throw error;
-    }
-
     return books;
   } catch (e) {
     throw e;
@@ -155,7 +141,9 @@ const modifyBook = async (userId, bookId, updatedBookData) => {
     // Check if the book update failed
     if (rowsUpdated === 0) {
       // If the update fails, throw an error indicating the update failure
-      throw new Error("Book update failed");
+      const error = new Error("Book update failed");
+      error.status = 500;
+      throw error;
     }
 
     // Return the updated book object
