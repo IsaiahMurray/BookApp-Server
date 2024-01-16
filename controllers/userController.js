@@ -23,6 +23,7 @@ const {
   DELETE_SUCCESS,
   USER_FOUND,
   NO_USER,
+  NOT_FOUND,
 } = require("../controllers/constants");
 
 //* User register
@@ -43,7 +44,7 @@ UserController.route("/register").post(async (req, res) => {
     handleSuccessResponse(res, 201, userId, CREATE_SUCCESS);
   } catch (e) {
     if (e instanceof Error) {
-      handleErrorResponse(res, res.status, TITLE_SIGNUP_ERROR, e.message);
+      handleErrorResponse(res, res.status || 500, TITLE_SIGNUP_ERROR, e.message);
     }
   }
 });
@@ -75,7 +76,7 @@ UserController.route("/login").post(async (req, res) => {
     handleSuccessResponse(res, 200, foundUser, USER_FOUND);
   } catch (e) {
     if (e instanceof Error) {
-      handleErrorResponse(res, res.status, TITLE_LOGIN_ERROR, e.message);
+      handleErrorResponse(res, res.status || 500, TITLE_LOGIN_ERROR, e.message);
     }
   }
 });
@@ -94,7 +95,7 @@ UserController.route("/update/username").put(
       handleSuccessResponse(res, 200, updatedUserName, UPDATE_SUCCESS);
     } catch (e) {
       if (e instanceof Error) {
-        handleErrorResponse(res, rs.status, UPDATE_FAIL, e.message);
+        handleErrorResponse(res, res.status || 500, UPDATE_FAIL, e.message);
       }
     }
   }
@@ -118,7 +119,7 @@ UserController.route("/update/email").put(ValidateSession, async (req, res) => {
     });
   } catch (e) {
     if (e instanceof Error) {
-      handleErrorResponse(res, res.status, UPDATE_FAIL, e.message);
+      handleErrorResponse(res, res.status || 500, UPDATE_FAIL, e.message);
     }
   }
 });
@@ -141,7 +142,7 @@ UserController.route("/update/password").put(
       handleSuccessResponse(res, 200, updatedUserPass, UPDATE_SUCCESS)
     } catch (e) {
       if (e instanceof Error) {
-        handleErrorResponse(res, res.status, UPDATE_FAIL, e.message);
+        handleErrorResponse(res, res.status || 500, UPDATE_FAIL, e.message);
       }
     }
   }
@@ -160,7 +161,7 @@ UserController.route("/delete").delete(ValidateSession, async (req, res) => {
     handleSuccessResponse(res, 200, destroyedUser, DELETE_SUCCESS);
   } catch (e) {
     if (e instanceof Error) {
-      handleErrorResponse(res, res.status, DELETE_FAIL, e.message);
+      handleErrorResponse(res, res.status || 500, DELETE_FAIL, e.message);
     }
   }
 });
@@ -183,7 +184,7 @@ UserController.route("/upload/profile-picture").patch(
       handleSuccessResponse(res, 200, uploadedPic, UPDATE_SUCCESS);
     } catch (e) {
       if (e instanceof Error) {
-        handleErrorResponse(res, res.status, UPDATE_FAIL, e.message);
+        handleErrorResponse(res, res.status || 500, UPDATE_FAIL, e.message);
       }
     }
   }
@@ -221,15 +222,19 @@ UserController.route("/remove/profile-picture").patch(
           handleSuccessResponse(res, 200, removedPic, UPDATE_SUCCESS);
         } else {
           // If the profilePicture is not set to null in the model, handle accordingly
-          handleErrorResponse(res, 500, UPDATE_FAIL, e.message);
+          const error = new Error(UPDATE_FAIL);
+          error.status = 500;
+          throw error;
         }
       } else {
-        // If book or coverPicture is not found, handle accordingly
-        handleErrorResponse(res, 404, NOT_FOUND, "Profile picture not found.");
+        // If profilePicture is not found, handle accordingly
+        const error = new Error(NOT_FOUND);
+        error.status = 404;
+        throw error;
       }
     } catch (e) {
       if (e instanceof Error) {
-        handleErrorResponse(res, res.status, UPDATE_FAIL, e.message);
+        handleErrorResponse(res, res.status || 500, UPDATE_FAIL, e.message);
       }
     }
   }

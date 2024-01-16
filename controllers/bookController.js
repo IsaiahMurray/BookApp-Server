@@ -42,7 +42,7 @@ BookController.route("/create").post(ValidateSession, async (req, res) => {
   } catch (e) {
     //Handle error
     if (e instanceof Error) {
-      handleErrorResponse(res, 500, CREATE_FAIL, e.message);
+      handleErrorResponse(res, res.status || 500, CREATE_FAIL, e.message);
     }
   }
 });
@@ -58,13 +58,7 @@ BookController.route("/get/all").get(async (req, res) => {
   } catch (e) {
     if (e instanceof Error) {
       // Handle different error scenarios
-      if (e.status === 404) {
-        // Not Found error (if no books found)
-        handleErrorResponse(res, 404, NOTFOUND, e.message);
-      } else {
-        // Internal server error for other errors
-        handleErrorResponse(res, 500, GET_FAIL, e.message);
-      }
+      handleErrorResponse(res, res.status || 500, GET_FAIL, e.message);
     }
   }
 });
@@ -87,7 +81,7 @@ BookController.route("/get/books/:userId").get(async (req, res) => {
     handleSuccessResponse(res, 200, books, GET_SUCCESS);
   } catch (error) {
     // Handle any caught errors
-    handleErrorResponse(res, 500, GET_FAIL, e.message);
+    handleErrorResponse(res, res.status || 500, GET_FAIL, e.message);
   }
 });
 
@@ -100,10 +94,7 @@ BookController.route("/get/:id").get(async (req, res) => {
     handleSuccessResponse(res, 200, book, GET_SUCCESS);
   } catch (e) {
     if (e instanceof Error) {
-      if(e.status == 404){
-        handleErrorResponse(res, 404, NOT_FOUND, e.message);
-      }
-      handleErrorResponse(res, 500, GET_FAIL, e.message);
+      handleErrorResponse(res, res.status || 500, GET_FAIL, e.message);
     }
   }
 });
@@ -114,7 +105,8 @@ BookController.route("/get-tags").get(async (req, res) => {
     const { tags } = req.query;
 
     if (!tags || !Array.isArray(tags)) {
-      handleErrorResponse(res, 400, BAD_REQ, "Tags parameter must be an array");
+      const error = new Error("Tags parameter must be an array");
+      error.status = 400;
     }
 
     const books = await BookService.getBooksByTags(tags);
@@ -125,10 +117,7 @@ BookController.route("/get-tags").get(async (req, res) => {
     handleSuccessResponse(res, 200, books, GET_SUCCESS);
   } catch (e) {
     if (e instanceof Error) {
-      if (res.status == 404) {
-      } else {
-        handleErrorResponse(res, 500, GET_FAIL, e.message);
-      }
+        handleErrorResponse(res, res.status || 500, GET_FAIL, e.message);
     }
   }
 });
@@ -152,16 +141,7 @@ BookController.route("/update/:bookId").put(
     } catch (e) {
       if (e instanceof Error) {
         // Handle different error scenarios
-        if (e.status === 404) {
-          // Not Found error (if the book doesn't exist)
-          handleErrorResponse(res, 404, NOT_FOUND, e.message);
-        } else if (e.status === 403) {
-          // Not Authorized error (if the book doesn't belong to the user)
-          handleErrorResponse(res, 403, NO_AUTH, e.message);
-        } else {
-          // Internal server error for other errors
-          handleErrorResponse(res, 500, UPDATE_FAIL, e.message);
-        }
+        handleErrorResponse(res, res.status || 500, UPDATE_FAIL, e.message);
       }
     }
   }
@@ -188,19 +168,7 @@ BookController.route("/patch/:bookId").patch(
     } catch (e) {
       if (e instanceof Error) {
         // Handle different error scenarios
-        if (e.status === 404) {
-          // Not Found error (if the book doesn't exist)
-          handleErrorResponse(res, 404, NOT_FOUND, e.message);
-        } else if (e.status === 403) {
-          // Not Authorized error (if the book doesn't belong to the user)
-          handleErrorResponse(res, 403, NO_AUTH, e.message);
-        } else if (e.status === 400) {
-          // Bad Request error (if the book property doesn't exist or is misspelled)
-          handleErrorResponse(res, 400, BAD_REQ, e.message);
-        } else {
-          // Internal server error for other errors
-          handleErrorResponse(res, 500, DELETE_FAIL, e.message);
-        }
+        handleErrorResponse(res, res.status || 500, UPDATE_FAIL, e.message);
       }
     }
   }
@@ -222,13 +190,7 @@ BookController.route("/delete/:bookId").delete(
     } catch (e) {
       if (e instanceof Error) {
         // Handle different error scenarios
-        if (e.status === 404) {
-          // Not Found error (if the book doesn't exist)
-          handleErrorResponse(res, 404, NOT_FOUND, e.message);
-        } else {
-          // Internal server error for other errors
-          handleErrorResponse(res, 500, DELETE_FAIL, e.message);
-        }
+        handleErrorResponse(res, res.status || 500, DELETE_FAIL, e.message);
       }
     }
   }
@@ -251,7 +213,7 @@ BookController.route("/upload/cover-picture/:bookId").patch(
       handleSuccessResponse(res, 200, uploadedPic, UPDATE_SUCCESS);
     } catch (e) {
       if (e instanceof Error) {
-        handleErrorResponse(res, 500, UPDATE_FAIL, e.message);
+        handleErrorResponse(res, res.status || 500, UPDATE_FAIL, e.message);
       }
     }
   }
@@ -296,26 +258,20 @@ BookController.route("/remove/cover-picture/:bookId").patch(
             "Files in uploads folder:",
             fs.readdirSync(uploadsFolderPath)
           );
-          handleErrorResponse(
-            res,
-            404,
-            NOT_FOUND,
-            "File not found in the uploads folder."
-          );
+          const error = new Error(NOT_FOUND);
+          error.status = 404;
+          throw error;
         }
       } else {
         // If book or coverPicture is not found, handle accordingly
-        handleErrorResponse(
-          res,
-          404,
-          NOT_FOUND,
-          "Book or cover picture not found."
-        );
+        const error = new Error(NOT_FOUND);
+        error.status = 404;
+        throw error;
       }
     } catch (e) {
       // Handle other errors
       if (e instanceof Error) {
-        handleErrorResponse(res, 500, UPDATE_FAIL, e.message);
+        handleErrorResponse(res, res.status || 500, UPDATE_FAIL, e.message);
       }
     }
   }
