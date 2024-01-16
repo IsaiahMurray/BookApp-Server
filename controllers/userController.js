@@ -22,6 +22,7 @@ const {
   DELETE_FAIL,
   DELETE_SUCCESS,
   USER_FOUND,
+  NO_USER,
 } = require("../controllers/constants");
 
 //* User register
@@ -39,22 +40,10 @@ UserController.route("/register").post(async (req, res) => {
       password: hashedPassword,
     });
 
-    res.json({
-      userId,
-      info: {
-        message: CREATE_SUCCESS,
-      },
-    });
+    handleSuccessResponse(res, 201, userId, CREATE_SUCCESS);
   } catch (e) {
     if (e instanceof Error) {
-      const errorMessage = {
-        title: TITLE_SIGNUP_ERROR,
-        info: {
-          message:
-            e.message === "Validation error" ? e.original.detail : e.message,
-        },
-      };
-      res.send(errorMessage);
+      handleErrorResponse(res, res.status, TITLE_SIGNUP_ERROR, e.message);
     }
   }
 });
@@ -71,29 +60,22 @@ UserController.route("/login").post(async (req, res) => {
 
     const foundUser = await UserService.getByEmail(email);
 
-    if (!foundUser) throw new Error(INCORRECT_EMAIL_PASSWORD);
-    if (!(await PasswordService.validatePassword(password, foundUser.password)))
-      throw new Error(INCORRECT_EMAIL_PASSWORD);
+    if (!foundUser){
+      const error = new Error(NO_USER);
+      error.status = 404;
+      throw error;
+    }
+    if (!(await PasswordService.validatePassword(password, foundUser.password))){
+      const error = new Error(INCORRECT_EMAIL_PASSWORD);
+      error.status = 403;
+      throw error;
+    }
 
-    const userId = foundUser?.id;
-    const token = await JWTService.createSessionToken(userId);
 
-    res.json({
-      user: foundUser,
-      token: token,
-      info: {
-        message: USER_FOUND,
-      },
-    });
+    handleSuccessResponse(res, 200, foundUser, USER_FOUND);
   } catch (e) {
     if (e instanceof Error) {
-      const errorMessage = {
-        title: TITLE_LOGIN_ERROR,
-        info: {
-          message: e.message,
-        },
-      };
-      res.send(errorMessage);
+      handleErrorResponse(res, res.status, TITLE_LOGIN_ERROR, e.message);
     }
   }
 });
@@ -109,22 +91,10 @@ UserController.route("/update/username").put(
       const { id } = req.user;
 
       const updatedUserName = await UserService.modifyUsername(id, username);
-      res.json({
-        user: updatedUserName,
-        info: {
-          message: UPDATE_SUCCESS,
-          username: username,
-        },
-      });
+      handleSuccessResponse(res, 200, updatedUserName, UPDATE_SUCCESS);
     } catch (e) {
       if (e instanceof Error) {
-        const errorMessage = {
-          title: UPDATE_FAIL,
-          info: {
-            message: e.message,
-          },
-        };
-        res.send(errorMessage);
+        handleErrorResponse(res, rs.status, UPDATE_FAIL, e.message);
       }
     }
   }
@@ -138,6 +108,7 @@ UserController.route("/update/email").put(ValidateSession, async (req, res) => {
     const { email } = req.body;
     const { id } = req.user;
     const updatedUserEmail = await UserService.modifyEmail(id, email);
+    handleSuccessResponse(res, 200, updatedUserEmail, UPDATE_SUCCESS);
     res.json({
       user: updatedUserEmail,
       info: {
@@ -147,13 +118,7 @@ UserController.route("/update/email").put(ValidateSession, async (req, res) => {
     });
   } catch (e) {
     if (e instanceof Error) {
-      const errorMessage = {
-        title: UPDATE_FAIL,
-        info: {
-          message: e.message,
-        },
-      };
-      res.send(errorMessage);
+      handleErrorResponse(res, res.status, UPDATE_FAIL, e.message);
     }
   }
 });
@@ -173,22 +138,10 @@ UserController.route("/update/password").put(
         id,
         hashedPassword
       );
-      res.json({
-        user: updatedUserPass,
-        info: {
-          message: UPDATE_SUCCESS,
-          password: password,
-        },
-      });
+      handleSuccessResponse(res, 200, updatedUserPass, UPDATE_SUCCESS)
     } catch (e) {
       if (e instanceof Error) {
-        const errorMessage = {
-          title: UPDATE_FAIL,
-          info: {
-            message: e.message,
-          },
-        };
-        res.send(errorMessage);
+        handleErrorResponse(res, res.status, UPDATE_FAIL, e.message);
       }
     }
   }
