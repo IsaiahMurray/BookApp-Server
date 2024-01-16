@@ -15,6 +15,10 @@ const {
   NOT_FOUND,
   CONFLICT,
 } = require("../controllers/constants");
+const {
+  handleErrorResponse,
+  handleSuccessResponse,
+} = require("../services/helpers/responseHandler");
 
 //* Create Tag
 TagController.route("/create").post(ValidateAdmin, async (req, res) => {
@@ -23,30 +27,11 @@ TagController.route("/create").post(ValidateAdmin, async (req, res) => {
 
     const newTag = await TagService.createTag(tagName);
 
-    res.status(201).json({
-      message: CREATE_SUCCESS,
-      newTag,
-    });
+    handleSuccessResponse(res, 201, newTag, CREATE_SUCCESS);
   } catch (e) {
     if (e instanceof Error) {
       // Handle different error scenarios
-      if (e.status === 409) {
-        // Conflict error (if the tag already exists)
-        res.status(409).json({
-          title: CONFLICT,
-          info: {
-            message: e.message,
-          },
-        });
-      } else {
-        // Internal server error for other errors
-        res.status(500).json({
-          title: CREATE_FAIL,
-          info: {
-            message: e.message,
-          },
-        });
-      }
+      handleErrorResponse(res, res.status || 500, CREATE_FAIL, e.message);
     }
   }
 });
@@ -56,30 +41,11 @@ TagController.route("/get").get(async (req, res) => {
   try {
     const tags = await TagService.getAllTags();
 
-    res.status(200).json({
-      message: GET_SUCCESS,
-      tags,
-    });
+    handleSuccessResponse(res, 200, tags, GET_SUCCESS);
   } catch (e) {
     if (e instanceof Error) {
       // Handle different error scenarios
-      if (e.status === 404) {
-        // Not Found error (if no tags found)
-        res.status(404).json({
-          title: NOT_FOUND,
-          info: {
-            message: e.message,
-          },
-        });
-      } else {
-        // Internal server error for other errors
-        res.status(500).json({
-          title: GET_FAIL,
-          info: {
-            message: e.message,
-          },
-        });
-      }
+      handleErrorResponse(res, res.status || 500, GET_FAIL, e.message);
     }
   }
 });
@@ -92,30 +58,11 @@ TagController.route("/update/:tagId").put(ValidateAdmin, async (req, res) => {
 
     const updatedTag = await TagService.updateTag(tagId, tagName);
 
-    res.status(200).json({
-      message: UPDATE_SUCCESS,
-      updatedTag,
-    });
+    handleSuccessResponse(res, 200, updatedTag, UPDATE_SUCCESS);
   } catch (e) {
     if (e instanceof Error) {
       // Handle different error scenarios
-      if (e.status === 404) {
-        // Not Found error (if no tag found)
-        res.status(404).json({
-          title: NOT_FOUND,
-          info: {
-            message: e.message,
-          },
-        });
-      } else {
-        // Internal server error for other errors
-        res.status(500).json({
-          title: UPDATE_FAIL,
-          info: {
-            message: e.message,
-          },
-        });
-      }
+      handleErrorResponse(res, res.status || 500, UPDATE_FAIL, e.message);
     }
   }
 });
@@ -129,106 +76,59 @@ TagController.route("/delete/:tagId").delete(
 
       const deletedTag = await TagService.deleteTag(tagId);
 
-      res.status(200).json({
-        message: DELETE_SUCCESS,
-        deletedTag,
-      });
+      handleSuccessResponse(res, 200, deletedTag, DELETE_SUCCESS);
     } catch (e) {
       if (e instanceof Error) {
         // Handle different error scenarios
-        if (e.status === 404) {
-          // Not Found error (if no tag found)
-          res.status(404).json({
-            title: NOT_FOUND,
-            info: {
-              message: e.message,
-            },
-          });
-        } else {
-          // Internal server error for other errors
-          res.status(500).json({
-            title: DELETE_FAIL,
-            info: {
-              message: e.message,
-            },
-          });
-        }
+        handleErrorResponse(res, res.status, DELETE_FAIL, e.message);
       }
     }
   }
 );
 
 //* Add Tags to Book
-TagController.route('/add/:bookId/tags').patch( ValidateSession, ValidateAdmin, async (req, res) => {
-  try {
-    const { bookId } = req.params;
-    const { tagIds } = req.body;
+TagController.route("/add/:bookId/tags").patch(
+  ValidateSession,
+  ValidateAdmin,
+  async (req, res) => {
+    try {
+      const { bookId } = req.params;
+      const { tagIds } = req.body;
 
-    const result = await TagService.addMultipleTagsToBook(bookId, tagIds);
-    
-    res.status(200).json({
-      message: UPDATE_SUCCESS,
-      result,
-    });
-  } catch (e) {
-    if (e instanceof Error) {
-      // Handle different error scenarios
-      if (e.status === 404) {
-        // Not Found error (if no book found)
-        res.status(404).json({
-          title: NOT_FOUND,
-          info: {
-            message: e.message,
-          },
-        });
-      } else {
-        // Internal server error for other errors
-        res.status(500).json({
-          title: DELETE_FAIL,
-          info: {
-            message: e.message,
-          },
-        });
+      const result = await TagService.addMultipleTagsToBook(bookId, tagIds);
+
+      handleSuccessResponse(res, 200, result, UPDATE_SUCCESS);
+    } catch (e) {
+      if (e instanceof Error) {
+        // Handle different error scenarios
+        handleErrorResponse(res, res.status || 500, UPDATE_FAIL, e.message);
       }
     }
   }
-});
+);
 
 //* Remove Tags from Book
-TagController.route('/remove/:bookId/tags').patch(ValidateSession, ValidateAdmin, async (req, res) => {
-  try {
-    const { bookId } = req.params;
-    const { tagIds } = req.body;
+TagController.route("/remove/:bookId/tags").patch(
+  ValidateSession,
+  ValidateAdmin,
+  async (req, res) => {
+    try {
+      const { bookId } = req.params;
+      const { tagIds } = req.body;
 
-    const result = await TagService.removeMultipleTagsFromBook(bookId, tagIds);
+      const result = await TagService.removeMultipleTagsFromBook(
+        bookId,
+        tagIds
+      );
 
-    res.status(200).json({
-      message: UPDATE_SUCCESS,
-      result,
-    });
-  } catch (e) {
-    if (e instanceof Error) {
-      // Handle different error scenarios
-      if (e.status === 404) {
-        // Not Found error (if no tag found)
-        res.status(404).json({
-          title: NOT_FOUND,
-          info: {
-            message: e.message,
-          },
-        });
-      } else {
-        // Internal server error for other errors
-        res.status(500).json({
-          title: CREATE_FAIL,
-          info: {
-            message: e.message,
-          },
-        });
+      handleSuccessResponse(res, 200, result, UPDATE_SUCCESS);
+    } catch (e) {
+      if (e instanceof Error) {
+        // Handle different error scenarios
+        handleErrorResponse(res, res.status || 500, UPDATE_FAIL, e.message);
       }
     }
   }
-});
-
+);
 
 module.exports = TagController;

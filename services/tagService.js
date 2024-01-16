@@ -1,3 +1,4 @@
+const { CONFLICT, NOT_FOUND } = require("../controllers/constants");
 const { TagModel, BookModel } = require("../models");
 
 // Create a new tag
@@ -11,7 +12,7 @@ const createTag = async (tagName) => {
     });
 
     if (existingTag) {
-      const error = new Error("Tag with the same name already exists");
+      const error = new Error(CONFLICT);
       error.status = 409;
       throw error;
     }
@@ -34,8 +35,8 @@ const getAllTags = async () => {
     // Check if no tags were found
     if (!tags || tags.length === 0) {
       // If no tags are found, create an error object
-      const error = new Error("No tags have been created");
-      error.status = 404; // Set the status code to 404 for resource not found
+      const error = new Error(NO_CONTENT);
+      error.status = 204; // Set the status code to 404 for resource not found
       throw error; // Throw the error to handle it further
     }
 
@@ -53,7 +54,7 @@ const updateTag = async (tagId, newName) => {
 
     // Check if the tag exists
     if (!tagToUpdate) {
-      const error = new Error("Tag not found");
+      const error = new Error(NOT_FOUND);
       error.status = 404;
       throw error;
     }
@@ -77,7 +78,7 @@ const deleteTag = async (tagId) => {
 
     // Check if the tag exists
     if (!tagToDelete) {
-      const error = new Error("Tag not found");
+      const error = new Error(NOT_FOUND);
       error.status = 404;
       throw error;
     }
@@ -98,7 +99,7 @@ const addMultipleTagsToBook = async (bookId, tagIds) => {
 
     // If no book, throw not found
     if (!book) {
-      const error = new Error("Book not found");
+      const error = new Error(NOT_FOUND);
       error.status = 404;
       throw error;
     }
@@ -130,9 +131,8 @@ const addMultipleTagsToBook = async (bookId, tagIds) => {
 const removeMultipleTagsFromBook = async (bookId, tagIds) => {
   try {
     const book = await BookModel.findByPk(bookId);
-console.log(book)
     if (!book) {
-      const error = new Error("Book not found");
+      const error = new Error(NOT_FOUND);
       error.status = 404;
       throw error;
     }
@@ -140,7 +140,8 @@ console.log(book)
     function removeSimilarValues(array1, array2) {
       // Ensure both arrays are provided
       if (!Array.isArray(array1) || !Array.isArray(array2)) {
-        throw new Error("Both parameters must be arrays");
+        const error = new Error("Both parameters must be arrays");
+        error.status = 409;
       }
       
       // Filter out values in array2 that are present in array1
