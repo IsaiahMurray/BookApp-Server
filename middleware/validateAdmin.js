@@ -1,9 +1,11 @@
 const {
   INVALID_TOKEN,
   NO_AUTH,
+  FORBIDDEN,
 } = require("../controllers/constants");
 const jwt = require("jsonwebtoken");
 const { UserModel } = require("../models");
+const {handleErrorResponse, handleSuccessResponse} = require("../services/helpers/responseHandler");
 
 module.exports = async (req, res, next) => {
   try {
@@ -25,19 +27,12 @@ module.exports = async (req, res, next) => {
           .catch((err) => next(err));
       } else {
         req.errors = err;
-        return res.status(403).send(NO_AUTH);
+        handleErrorResponse(res, 403, FORBIDDEN, NO_AUTH);
       }
     });
   } catch (e) {
     if (e instanceof Error) {
-      const errorMessage = {
-        title: INVALID_TOKEN,
-        info: {
-          message: e.message,
-        },
-      };
-      errorMessage.status(500);
-      res.send(errorMessage);
+      handleErrorResponse(res, res.status || 500, INVALID_TOKEN, e.message);
     }
   }
 };
