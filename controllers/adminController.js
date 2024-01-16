@@ -4,52 +4,48 @@ const AdminController = require("express").Router();
 
 const {
   INCORRECT_EMAIL_PASSWORD,
-  USER_CREATED,
   ADMIN_CREATED,
-  USER_FOUND,
   UPDATE_SUCCESS,
   UPDATE_FAIL,
-  TITLE_LOGIN_ERROR,
   TITLE_SIGNUP_ERROR,
   DELETE_FAIL,
   DELETE_SUCCESS,
   GET_FAIL,
   GET_SUCCESS,
+  NO_USER,
 } = require("../controllers/constants");
-const services = require("../services/index");
+const {
+  handleSuccessResponse,
+  handleErrorResponse,
+} = require("../services/helpers/responseHandler");
 
 //* Create new Admin User
 AdminController.route("/register").post(async (req, res) => {
   try {
     const { username, email, password } = req.body;
 
-    if (!email || !password) throw new Error(INCORRECT_EMAIL_PASSWORD);
+    if (!email || !password) {
+      const error = new Error(INCORRECT_EMAIL_PASSWORD);
+      error.status = 500;
+      throw error;
+    }
 
-    const hashedPassword = await PasswordService.hashPassword(
-      password
-    );
+    const hashedPassword = await PasswordService.hashPassword(password);
     const userId = await AdminService.adminCreate({
       username,
       email,
       password: hashedPassword,
     });
 
-    res.json({
-      userId,
-      info: {
-        message: ADMIN_CREATED,
-      },
-    });
+    handleSuccessResponse(res, 201, userId, ADMIN_CREATED);
   } catch (e) {
     if (e instanceof Error) {
-      const errorMessage = {
-        title: TITLE_SIGNUP_ERROR,
-        info: {
-          message:
-            e.message === "Validation error" ? e.original.detail : e.message,
-        },
-      };
-      res.send(errorMessage);
+      handleErrorResponse(
+        res,
+        res.status || 500,
+        TITLE_SIGNUP_ERROR,
+        e.message
+      );
     }
   }
 });
@@ -59,21 +55,10 @@ AdminController.route("/get/users").get(async (req, res) => {
   try {
     const allUsers = await AdminService.getAllUsers(); // Await here
 
-    res.status(200).json({
-      info: {
-        message: GET_SUCCESS,
-        users: allUsers,
-      },
-    });
+    handleSuccessResponse(res, 200, allUsers, GET_SUCCESS);
   } catch (e) {
     if (e instanceof Error) {
-      const errorMessage = {
-        title: GET_FAIL,
-        info: {
-          message: e.message,
-        },
-      };
-      res.status(500).json(errorMessage);
+      handleErrorResponse(res, res.status || 500, GET_FAIL, e.message);
     }
   }
 });
@@ -85,18 +70,14 @@ AdminController.route("/get/:userId").get(async (req, res) => {
   try {
     const user = await AdminService.getById(userId);
     if (!user) {
-      return res.status(404).json({ message: "User not found" });
+      const error = new Error(NO_USER);
+      error.status = 404;
+      throw error;
     }
     res.json(user);
   } catch (e) {
     if (e instanceof Error) {
-      const errorMessage = {
-        title: GET_FAIL,
-        info: {
-          message: e.message,
-        },
-      };
-      res.send(errorMessage);
+      handleErrorResponse(res, res.status || 500, GET_FAIL, e.message);
     }
   }
 });
@@ -107,22 +88,11 @@ AdminController.route("/modify/role/:id").put(async (req, res) => {
     const { role } = req.body;
     const { id } = req.params;
     const updatedRole = await AdminService.modifyRole(id, role);
-    res.json({
-      user: updatedRole,
-      info: {
-        message: UPDATE_SUCCESS,
-        role: role,
-      },
-    });
+
+    handleSuccessResponse(res, 200, updatedRole, UPDATE_SUCCESS);
   } catch (e) {
     if (e instanceof Error) {
-      const errorMessage = {
-        title: UPDATE_FAIL,
-        info: {
-          message: e.message,
-        },
-      };
-      res.send(errorMessage);
+      handleErrorResponse(res, res.status || 500, UPDATE_FAIL, e.message);
     }
   }
 });
@@ -133,21 +103,10 @@ AdminController.route("/delete/:id").delete(async (req, res) => {
     const { id } = req.params;
     const destroyedUser = await AdminService.remove(id);
 
-    res.status(200).json({
-      destroyedUser,
-      info: {
-        message: DELETE_SUCCESS,
-      },
-    });
+    handleSuccessResponse(res, 200, destroyedUser, DELETE_SUCCESS);
   } catch (e) {
     if (e instanceof Error) {
-      const errorMessage = {
-        title: DELETE_FAIL,
-        info: {
-          message: e.message,
-        },
-      };
-      res.send(errorMessage);
+      handleErrorResponse(res, res.status || 500, DELETE_FAIL, e.message);
     }
   }
 });
