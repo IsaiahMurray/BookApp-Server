@@ -10,8 +10,10 @@ const {
   GET_FAIL,
   UPDATE_FAIL,
   DELETE_FAIL,
-  CONTENT_EXISTS,
+  NO_CONTENT,
+  NOT_FOUND,
 } = require("./constants");
+const { handleSuccessResponse, handleErrorResponse } = require("../services/helpers/responseHandler");
 
 //* Create a new review
 ReviewController.route("/create/:bookId").post(
@@ -23,6 +25,20 @@ ReviewController.route("/create/:bookId").post(
       const { bookId } = req.params;
       const { comment, rating } = req.body;
 
+            // Check if the user has already reviewed the book
+    const existingReview = await ReviewModel.findOne({
+      where: {
+        userId,
+        bookId,
+      },
+    });
+
+    // Throw a 409 conflict
+    if (existingReview) {
+      const error = new Error('User has already reviewed this book');
+      error.status = 409;
+      throw error;
+    }
       const newReview = await ReviewService.createReview(
         userId,
         bookId,
@@ -30,29 +46,11 @@ ReviewController.route("/create/:bookId").post(
         rating
       );
 
-      res.status(201).json({
-        message: CREATE_SUCCESS,
-        newReview,
-      });
+      handleSuccessResponse(res, 201, newReview, CREATE_SUCCESS);
     } catch (e) {
       if (e instanceof Error) {
         // Handle different error scenarios
-        if (e.status == 409) {
-          res.status(409).json({
-            title: CONTENT_EXISTS,
-            info: {
-              message: e.message,
-            },
-          });
-        } else {
-          // Internal server error for other errors
-          res.status(500).json({
-            title: CREATE_FAIL,
-            info: {
-              message: e.message,
-            },
-          });
-        }
+        handleErrorResponse(res, res.status || 500, CREATE_FAIL, e.message);
       }
     }
   }
@@ -66,22 +64,13 @@ ReviewController.route("/get/:bookId").get(async (req, res) => {
     const reviews = await ReviewService.getReviewsByBookId(bookId);
 
     if (reviews.length === 0) {
-      return res.status(204).end("No reviews found for the book.");
+      handleSuccessResponse(res, 204, NO_CONTENT, "No reviews found for the book.");
     }
 
-    res.status(200).json({
-      message: GET_SUCCESS,
-      reviews,
-    });
+    handleSuccessResponse(res, 200, reviews, GET_SUCCESS)
   } catch (e) {
     if (e instanceof Error) {
-      const errorMessage = {
-        title: GET_FAIL,
-        info: {
-          message: e.message,
-        },
-      };
-      res.status(500).json(errorMessage);
+      handleErrorResponse(res, res.status || 500, GET_FAIL, e.message);
     }
   }
 });
@@ -90,6 +79,20 @@ ReviewController.route("/get/:bookId").get(async (req, res) => {
 ReviewController.route("/update/:reviewId").put(async (req, res) => {
   try {
     const { reviewId } = req.params;
+
+          // Check if the review exists
+          const existingReview = await ReviewModel.findOne({
+            where: {
+                id: reviewId
+            }
+        });
+    
+        if (!existingReview) {
+            const error = new Error(NOT_FOUND);
+            error.status = 404; // Set the status code to 404 for resource not found
+            throw error;
+        }
+
     // Replace manual line breaks with '\n' escape sequence
     const formattedComment = req.body.comment.replace(/\r?\n|\r/g, "\\n");
 
@@ -103,19 +106,10 @@ ReviewController.route("/update/:reviewId").put(async (req, res) => {
       updatedReviewData
     );
 
-    res.status(200).json({
-      message: UPDATE_SUCCESS,
-      updatedReview,
-    });
+    handleSuccessResponse(res, 200, updatedReview, UPDATE_SUCCESS);
   } catch (e) {
     if (e instanceof Error) {
-      const errorMessage = {
-        title: UPDATE_FAIL,
-        info: {
-          message: e.message,
-        },
-      };
-      res.status(500).json(errorMessage);
+      handleErrorResponse(res, res.status || 500, UPDATE_FAIL, e.message);
     }
   }
 });
@@ -126,25 +120,24 @@ ReviewController.route("/patch/:reviewId").patch(async (req, res) => {
     const { reviewId } = req.params;
     const { propertyName, propertyValue } = req.body;
 
+    const review = await ReviewModel.findByPk(reviewId);
+
+    if (!review) {
+      const error = new Error(NOT_FOUND);
+      error.status = 404;
+      throw error;
+    }
+
     const patchedReview = await ReviewService.patchReviewProperty(
       reviewId,
       propertyName,
       propertyValue
     );
 
-    res.status(200).json({
-      message: UPDATE_SUCCESS,
-      patchedReview,
-    });
+    handleSuccessResponse(res, 200, patchedReview, UPDATE_SUCCESS);
   } catch (e) {
     if (e instanceof Error) {
-      const errorMessage = {
-        title: UPDATE_FAIL,
-        info: {
-          message: e.message,
-        },
-      };
-      res.status(500).json(errorMessage);
+      handleErrorResponse(res, res.status || 500, UPDATE_FAIL, e.message);
     }
   }
 });
@@ -158,19 +151,10 @@ ReviewController.route("/delete/:reviewId").delete(
 
       const deletedReview = await ReviewService.deleteReview(reviewId);
 
-      res.status(200).json({
-        message: DELETE_SUCCESS,
-        deletedReview,
-      });
+      handleSuccessResponse(res, 200, deletedReview, DELETE_SUCCESS);
     } catch (e) {
       if (e instanceof Error) {
-        const errorMessage = {
-          title: DELETE_FAIL,
-          info: {
-            message: e.message,
-          },
-        };
-        res.status(500).json(errorMessage);
+        handleErrorResponse(res, res.status || 500, DELETE_FAIL, e.message);
       }
     }
   }

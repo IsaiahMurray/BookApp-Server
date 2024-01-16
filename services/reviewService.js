@@ -1,22 +1,9 @@
+const { NOT_FOUND } = require('../controllers/constants');
 const { ReviewModel, UserModel } = require('../models');
 
 // Create a new review
 const createReview = async (userId, bookId, comment, rating) => {
   try {
-      // Check if the user has already reviewed the book
-    const existingReview = await ReviewModel.findOne({
-      where: {
-        userId,
-        bookId,
-      },
-    });
-
-    // Throw a 409 conflict
-    if (existingReview) {
-      const error = new Error('User has already reviewed this book');
-      error.status = 409;
-      throw error;
-    }
     const newReview = await ReviewModel.create({
       userId,
       bookId,
@@ -47,26 +34,15 @@ const getReviewsByBookId = async (bookId) => {
 // Update an existing review
 const updateReview = async (reviewId, updatedReviewData) => {
   try {
-      // Check if the review exists
-      const existingReview = await ReviewModel.findOne({
-        where: {
-            id: reviewId
-        }
-    });
-
-    if (!existingReview) {
-        const error = new Error('Review not found');
-        error.status = 404; // Set the status code to 404 for resource not found
-        throw error;
-    }
-  
     const [rowsUpdated, [updatedReview]] = await ReviewModel.update(updatedReviewData, {
       where: { id: reviewId },
       returning: true,
     });
 
     if (rowsUpdated === 0) {
-      throw new Error('Review update failed');
+      const error = new Error(UPDATE_FAIL);
+      error.status = 500;
+      throw error;
     }
 
     return updatedReview;
@@ -80,13 +56,11 @@ const patchReviewProperty = async (reviewId, propertyName, propertyValue) => {
   try {
     const review = await ReviewModel.findByPk(reviewId);
 
-    if (!review) {
-      throw new Error('Review not found');
-    }
-
     // Check if the provided property exists in the review model
     if (!review[propertyName] && review[propertyName] !== 0) {
-      throw new Error('Invalid property name');
+      const error = new Error('Invalid property name');
+      error.status = 400;
+      throw error;
     }
 
     // Update the specified property dynamically
@@ -107,7 +81,9 @@ const deleteReview = async (reviewId) => {
     const reviewToDelete = await ReviewModel.findByPk(reviewId);
 
     if (!reviewToDelete) {
-      throw new Error('Review not found');
+      const error = new Error(NOT_FOUND);
+      error.status = 404;
+      throw error;
     }
 
     await reviewToDelete.destroy();
