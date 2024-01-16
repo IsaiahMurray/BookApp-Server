@@ -19,8 +19,6 @@ const {
   UPDATE_FAIL,
   DELETE_FAIL,
   DELETE_SUCCESS,
-  NO_AUTH,
-  BAD_REQ,
   NOT_FOUND,
 } = require("../controllers/constants");
 
