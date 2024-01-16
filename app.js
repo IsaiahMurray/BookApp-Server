@@ -28,7 +28,7 @@ dbConnection
     });
   })
   .catch((err) => {
-    console.error(chalk.redBright(err));
+    console.error(err);
   });
 
 app.use(middlewares.Headers);
