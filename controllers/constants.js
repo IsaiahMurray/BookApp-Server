@@ -11,7 +11,7 @@ const INCORRECT_EMAIL_PASSWORD = "Incorrect email or password.";
 const TITLE_LOGIN_ERROR = "Error logging in.";
 const TITLE_SIGNUP_ERROR = "Error signing up.";
 const USER_FOUND = "User has been found.";
-const NO_USER = " User could not be found."
+const NO_USER = "User could not be found."
 const CONTENT_EXISTS = "This content already exists.";
 const CONFLICT = "There is a conflict with this request.";
 const NO_AUTH = "Access denied.";
@@ -42,5 +42,6 @@ module.exports = {
     BAD_REQ,
     NO_TOKEN,
     NO_USER,
-    FORBIDDEN
+    FORBIDDEN,
+    NO_CONTENT
 }
