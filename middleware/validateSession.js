@@ -30,13 +30,7 @@ const ValidateSession = async (req, res, next) => {
     }
   } catch (e) {
     if (e instanceof Error) {
-      const statusCode = e.status || 500;
-      res.status(statusCode).json({
-        title: NO_AUTH,
-        info: {
-          message: e.message,
-        },
-      });
+      handleErrorResponse(res, res.status || 500, NO_AUTH, e.message);
     }
   }
 };
