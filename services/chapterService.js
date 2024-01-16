@@ -1,21 +1,8 @@
+const { NOT_FOUND } = require("../controllers/constants");
 const { ChapterModel } = require("../models");
 
 const createChapter = async ({ userId, bookId, title, content, chapterNumber }) => {
   try {
-    // Check if chapterNumber already exists for the given bookId
-    const existingChapter = await ChapterModel.findOne({
-      where: {
-          bookId,
-          chapterNumber
-      }
-  });
-
-  if (existingChapter) {
-      // If a chapter with the same number exists, return a 409 Conflict error
-      const error = new Error('Chapter number already exists for this book');
-      error.status = 409; // Set a custom status code
-      throw error;
-  }
     // Replace manual line breaks with '\n' escape sequence
     const formattedContent = content.replace(/\r?\n|\r/g, '\\n');
 
@@ -37,14 +24,6 @@ const getChaptersByBookId = async (bookId) => {
     // Find all chapters associated with the specified bookId
     const chapters = await ChapterModel.findAll({ where: { bookId } });
 
-    // Check if no chapters were found for the given bookId
-    if (!chapters || chapters.length === 0) {
-      // If no chapters are found, create an error object
-      const error = new Error('No chapters found for this book');
-      error.status = 404; // Set the status code to 404 for resource not found
-      throw error; // Throw the error to handle it further
-    }
-
     // If chapters are found, return the array of chapters
     return chapters;
   } catch (error) {
@@ -55,20 +34,6 @@ const getChaptersByBookId = async (bookId) => {
 
 const updateChapter = async ({ chapterId, title, content, chapterNumber, userId }) => {
   try {
-      // Check if the chapter exists
-      const existingChapter = await ChapterModel.findOne({
-          where: {
-              id: chapterId,
-              userId // Ensure the chapter belongs to the specified user
-          }
-      });
-
-      if (!existingChapter) {
-          const error = new Error('Chapter not found');
-          error.status = 404; // Set the status code to 404 for resource not found
-          throw error;
-      }
-
       // Replace manual line breaks with '\n' escape sequence
       const formattedContent = content.replace(/\r?\n|\r/g, '\\n');
 
@@ -94,7 +59,7 @@ const deleteChapter = async (chapterId) => {
     // Check if the chapter exists
     if (!deletedChapter) {
       // If the chapter doesn't exist, create an error object
-      const error = new Error("Chapter not found");
+      const error = new Error(NOT_FOUND);
       error.status = 404; // Set the status code to 404 for resource not found
       throw error; // Throw the error to handle it further
     }
