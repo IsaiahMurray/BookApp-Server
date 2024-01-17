@@ -25,6 +25,11 @@ const UserModel = db.define("user", {
     type: DataTypes.ARRAY(DataTypes.INTEGER),
     allowNull: true
   },
+  favorites: {
+    type: DataTypes.ARRAY(DataTypes.INTEGER),
+    allowNull: true,
+    defaultValue: []
+  },
   archiveAccount: {
     type: DataTypes.BOOLEAN,
     allowNull: false,
