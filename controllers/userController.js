@@ -44,7 +44,7 @@ UserController.route("/register").post(async (req, res) => {
     handleSuccessResponse(res, 201, userId, CREATE_SUCCESS);
   } catch (e) {
     if (e instanceof Error) {
-      handleErrorResponse(res, res.status || 500, TITLE_SIGNUP_ERROR, e.message);
+      handleErrorResponse(res, e.status || 500, TITLE_SIGNUP_ERROR, e.message);
     }
   }
 });
@@ -71,12 +71,18 @@ UserController.route("/login").post(async (req, res) => {
       error.status = 403;
       throw error;
     }
+    const userId = foundUser?.id;
+    const token = await JWTService.createSessionToken(userId);
 
-
+    res.status(200).json({
+      message: USER_FOUND,
+      user: foundUser,
+      token: token
+    })
     handleSuccessResponse(res, 200, foundUser, USER_FOUND);
   } catch (e) {
     if (e instanceof Error) {
-      handleErrorResponse(res, res.status || 500, TITLE_LOGIN_ERROR, e.message);
+      handleErrorResponse(res, e.status || 500, TITLE_LOGIN_ERROR, e.message);
     }
   }
 });
@@ -95,7 +101,7 @@ UserController.route("/update/username").put(
       handleSuccessResponse(res, 200, updatedUserName, UPDATE_SUCCESS);
     } catch (e) {
       if (e instanceof Error) {
-        handleErrorResponse(res, res.status || 500, UPDATE_FAIL, e.message);
+        handleErrorResponse(res, e.status || 500, UPDATE_FAIL, e.message);
       }
     }
   }
@@ -119,7 +125,7 @@ UserController.route("/update/email").put(ValidateSession, async (req, res) => {
     });
   } catch (e) {
     if (e instanceof Error) {
-      handleErrorResponse(res, res.status || 500, UPDATE_FAIL, e.message);
+      handleErrorResponse(res, e.status || 500, UPDATE_FAIL, e.message);
     }
   }
 });
@@ -142,7 +148,7 @@ UserController.route("/update/password").put(
       handleSuccessResponse(res, 200, updatedUserPass, UPDATE_SUCCESS)
     } catch (e) {
       if (e instanceof Error) {
-        handleErrorResponse(res, res.status || 500, UPDATE_FAIL, e.message);
+        handleErrorResponse(res, e.status || 500, UPDATE_FAIL, e.message);
       }
     }
   }
@@ -161,7 +167,7 @@ UserController.route("/delete").delete(ValidateSession, async (req, res) => {
     handleSuccessResponse(res, 200, destroyedUser, DELETE_SUCCESS);
   } catch (e) {
     if (e instanceof Error) {
-      handleErrorResponse(res, res.status || 500, DELETE_FAIL, e.message);
+      handleErrorResponse(res, e.status || 500, DELETE_FAIL, e.message);
     }
   }
 });
@@ -184,7 +190,7 @@ UserController.route("/upload/profile-picture").patch(
       handleSuccessResponse(res, 200, uploadedPic, UPDATE_SUCCESS);
     } catch (e) {
       if (e instanceof Error) {
-        handleErrorResponse(res, res.status || 500, UPDATE_FAIL, e.message);
+        handleErrorResponse(res, e.status || 500, UPDATE_FAIL, e.message);
       }
     }
   }
@@ -234,7 +240,7 @@ UserController.route("/remove/profile-picture").patch(
       }
     } catch (e) {
       if (e instanceof Error) {
-        handleErrorResponse(res, res.status || 500, UPDATE_FAIL, e.message);
+        handleErrorResponse(res, e.status || 500, UPDATE_FAIL, e.message);
       }
     }
   }

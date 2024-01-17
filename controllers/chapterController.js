@@ -54,7 +54,7 @@ ChapterController.route("/create/:bookId").post(async (req, res) => {
   } catch (e) {
     if (e instanceof Error) {
       // Handle different error scenarios
-        handleErrorResponse(res, res.status || 500, CREATE_FAIL, e.message);
+        handleErrorResponse(res, e.status || 500, CREATE_FAIL, e.message);
     }
   }
 });
@@ -81,7 +81,7 @@ ChapterController.route("/get/:bookId").get(async (req, res) => {
   } catch (e) {
     if (e instanceof Error) {
       // Handle errors
-      handleErrorResponse(res, res.status || 500, GET_FAIL, e.message);
+      handleErrorResponse(res, e.status || 500, GET_FAIL, e.message);
     }
   }
 });
@@ -121,7 +121,7 @@ ChapterController.route("/update/:chapterId").put(async (req, res) => {
   } catch (e) {
     if (e instanceof Error) {
       // Handle different error scenarios
-        handleErrorResponse(res, res.status || 500, UPDATE_FAIL, e.message);
+        handleErrorResponse(res, e.status || 500, UPDATE_FAIL, e.message);
     }
   }
 });
@@ -139,7 +139,7 @@ ChapterController.route("/delete/:chapterId").delete(async (req, res) => {
   } catch (e) {
     if (e instanceof Error) {
       // Handle different error scenarios
-      handleErrorResponse(res, res.status || 500, UPDATE_FAIL, e.message);
+      handleErrorResponse(res, e.status || 500, UPDATE_FAIL, e.message);
     }
   }
 });

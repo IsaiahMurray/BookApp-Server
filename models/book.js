@@ -55,6 +55,7 @@ const BookModel = db.define("book", {
     // Store the IDs of users who have access to the book with the 'limited' property
     type: DataTypes.ARRAY(DataTypes.INTEGER),
     allowNull: true,
+    defaultValue: []
   },
 });
 

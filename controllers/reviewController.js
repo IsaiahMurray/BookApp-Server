@@ -50,7 +50,7 @@ ReviewController.route("/create/:bookId").post(
     } catch (e) {
       if (e instanceof Error) {
         // Handle different error scenarios
-        handleErrorResponse(res, res.status || 500, CREATE_FAIL, e.message);
+        handleErrorResponse(res, e.status || 500, CREATE_FAIL, e.message);
       }
     }
   }
@@ -70,7 +70,7 @@ ReviewController.route("/get/:bookId").get(async (req, res) => {
     handleSuccessResponse(res, 200, reviews, GET_SUCCESS)
   } catch (e) {
     if (e instanceof Error) {
-      handleErrorResponse(res, res.status || 500, GET_FAIL, e.message);
+      handleErrorResponse(res, e.status || 500, GET_FAIL, e.message);
     }
   }
 });
@@ -109,7 +109,7 @@ ReviewController.route("/update/:reviewId").put(async (req, res) => {
     handleSuccessResponse(res, 200, updatedReview, UPDATE_SUCCESS);
   } catch (e) {
     if (e instanceof Error) {
-      handleErrorResponse(res, res.status || 500, UPDATE_FAIL, e.message);
+      handleErrorResponse(res, e.status || 500, UPDATE_FAIL, e.message);
     }
   }
 });
@@ -137,7 +137,7 @@ ReviewController.route("/patch/:reviewId").patch(async (req, res) => {
     handleSuccessResponse(res, 200, patchedReview, UPDATE_SUCCESS);
   } catch (e) {
     if (e instanceof Error) {
-      handleErrorResponse(res, res.status || 500, UPDATE_FAIL, e.message);
+      handleErrorResponse(res, e.status || 500, UPDATE_FAIL, e.message);
     }
   }
 });
@@ -154,7 +154,7 @@ ReviewController.route("/delete/:reviewId").delete(
       handleSuccessResponse(res, 200, deletedReview, DELETE_SUCCESS);
     } catch (e) {
       if (e instanceof Error) {
-        handleErrorResponse(res, res.status || 500, DELETE_FAIL, e.message);
+        handleErrorResponse(res, e.status || 500, DELETE_FAIL, e.message);
       }
     }
   }

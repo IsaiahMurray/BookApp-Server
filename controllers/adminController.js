@@ -42,7 +42,7 @@ AdminController.route("/register").post(async (req, res) => {
     if (e instanceof Error) {
       handleErrorResponse(
         res,
-        res.status || 500,
+        e.status || 500,
         TITLE_SIGNUP_ERROR,
         e.message
       );
@@ -58,7 +58,7 @@ AdminController.route("/get/users").get(async (req, res) => {
     handleSuccessResponse(res, 200, allUsers, GET_SUCCESS);
   } catch (e) {
     if (e instanceof Error) {
-      handleErrorResponse(res, res.status || 500, GET_FAIL, e.message);
+      handleErrorResponse(res, e.status || 500, GET_FAIL, e.message);
     }
   }
 });
@@ -77,7 +77,7 @@ AdminController.route("/get/:userId").get(async (req, res) => {
     res.json(user);
   } catch (e) {
     if (e instanceof Error) {
-      handleErrorResponse(res, res.status || 500, GET_FAIL, e.message);
+      handleErrorResponse(res, e.status || 500, GET_FAIL, e.message);
     }
   }
 });
@@ -92,7 +92,7 @@ AdminController.route("/modify/role/:id").put(async (req, res) => {
     handleSuccessResponse(res, 200, updatedRole, UPDATE_SUCCESS);
   } catch (e) {
     if (e instanceof Error) {
-      handleErrorResponse(res, res.status || 500, UPDATE_FAIL, e.message);
+      handleErrorResponse(res, e.status || 500, UPDATE_FAIL, e.message);
     }
   }
 });
@@ -106,7 +106,7 @@ AdminController.route("/delete/:id").delete(async (req, res) => {
     handleSuccessResponse(res, 200, destroyedUser, DELETE_SUCCESS);
   } catch (e) {
     if (e instanceof Error) {
-      handleErrorResponse(res, res.status || 500, DELETE_FAIL, e.message);
+      handleErrorResponse(res, e.status || 500, DELETE_FAIL, e.message);
     }
   }
 });

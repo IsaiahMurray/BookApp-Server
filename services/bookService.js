@@ -1,4 +1,5 @@
-const { BookModel, TagModel } = require("../models");
+const { NOT_FOUND } = require("../controllers/constants");
+const { BookModel, TagModel, UserModel } = require("../models");
 const { Op } = require("sequelize");
 
 //? Create Book
@@ -13,17 +14,49 @@ const create = async ({ userId, bookData }) => {
 };
 
 //? Get All Books
-const getAllBooks = async () => {
+const getAllBooks = async (userId) => {
   try {
+    let whereClause = {};
+
+    // If userId is provided, filter books based on privacy and allowedUsers
+    if (userId) {
+      whereClause = {
+        [Op.or]: [
+          { privacy: { [Op.not]: 'private' } }, // Exclude private books
+          {
+            privacy: 'private',
+            userId: userId, // Include private books if they belong to the logged-in user
+          },
+        ],
+      };
+    } else {
+      // If no userId, only retrieve public books
+      whereClause = { privacy: 'public' };
+    }
+
     // Retrieve all books from the database
-    const allBooks = await BookModel.findAll();
+    const allBooks = await BookModel.findAll({
+      where: whereClause,
+    });
 
     // Check if there are no books found
     if (!allBooks || allBooks.length === 0) {
       // If no books found, throw a 404 error
-      const error = new Error("No books found");
+      const error = new Error(NOT_FOUND);
       error.status = 404;
       throw error;
+    }
+    
+    // If userId is provided and books are set to limited, filter based on allowedUsers
+    if (userId) {
+      const filteredBooks = allBooks.filter((book) => {
+        return (
+          book.privacy !== 'limited' || // Include books with privacy not set to 'limited'
+          (book.privacy === 'limited' && book.allowedUsers.includes(userId))
+        );
+      });
+
+      return filteredBooks;
     }
 
     return allBooks;
@@ -32,15 +65,49 @@ const getAllBooks = async () => {
   }
 };
 
-//? Get All Books by User ID
-const getBooksByUser = async (id) => {
+//? Get Books By User ID
+const getBooksByUser = async (userId, loggedInUserId) => {
   try {
-    // Retrieve books associated with the given user ID
+    let whereClause = { userId };
+
+    // If loggedInUserId is provided and not the same as userId, filter books based on privacy and allowedUsers
+    if (loggedInUserId && loggedInUserId !== userId) {
+      whereClause = {
+        userId,
+        [Op.or]: [
+          { privacy: { [Op.not]: 'private' } }, // Exclude private books
+          {
+            privacy: 'private',
+            userId: loggedInUserId, // Include private books if they belong to the logged-in user
+          },
+        ],
+      };
+    }
+
+    // Retrieve books by the specified user from the database
     const userBooks = await BookModel.findAll({
-      where: {
-        userId: id,
-      },
+      where: whereClause,
     });
+
+    // Check if there are no books found
+    if (!userBooks || userBooks.length === 0) {
+      // If no books found, throw a 404 error
+      const error = new Error(NOT_FOUND);
+      error.status = 404;
+      throw error;
+    }
+
+    // If loggedInUserId is provided and books are set to limited, filter based on allowedUsers
+    if (loggedInUserId && loggedInUserId !== userId) {
+      const filteredUserBooks = userBooks.filter((book) => {
+        return (
+          book.privacy !== 'limited' || // Include books with privacy not set to 'limited'
+          (book.privacy === 'limited' && book.allowedUsers.includes(loggedInUserId))
+        );
+      });
+
+      return filteredUserBooks;
+    }
 
     return userBooks;
   } catch (e) {
@@ -165,19 +232,9 @@ const patchBookProperty = async (
     const bookToUpdate = await BookModel.findByPk(bookId);
 
     // Check if the book exists
-    if (!book) {
-      const error = new Error("Book not found");
+    if (!bookToUpdate) {
+      const error = new Error(NOT_FOUND);
       error.status = 404; // Set status to indicate resource not found
-      throw error;
-    }
-
-    // Check if the book belongs to the user
-    if (bookToUpdate.userId !== userId) {
-      // If the book doesn't belong to the user, throw an error indicating access denial
-      const error = new Error(
-        "Access denied - Book does not belong to the user"
-      );
-      error.status = 403; // Forbidden status code
       throw error;
     }
 

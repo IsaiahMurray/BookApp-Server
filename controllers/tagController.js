@@ -12,8 +12,7 @@ const {
   UPDATE_FAIL,
   DELETE_FAIL,
   DELETE_SUCCESS,
-  NOT_FOUND,
-  CONFLICT,
+
 } = require("../controllers/constants");
 const {
   handleErrorResponse,
@@ -31,7 +30,7 @@ TagController.route("/create").post(ValidateAdmin, async (req, res) => {
   } catch (e) {
     if (e instanceof Error) {
       // Handle different error scenarios
-      handleErrorResponse(res, res.status || 500, CREATE_FAIL, e.message);
+      handleErrorResponse(res, e.status, CREATE_FAIL, e.message);
     }
   }
 });
@@ -45,7 +44,7 @@ TagController.route("/get").get(async (req, res) => {
   } catch (e) {
     if (e instanceof Error) {
       // Handle different error scenarios
-      handleErrorResponse(res, res.status || 500, GET_FAIL, e.message);
+      handleErrorResponse(res, e.status || 500, GET_FAIL, e.message);
     }
   }
 });
@@ -62,7 +61,7 @@ TagController.route("/update/:tagId").put(ValidateAdmin, async (req, res) => {
   } catch (e) {
     if (e instanceof Error) {
       // Handle different error scenarios
-      handleErrorResponse(res, res.status || 500, UPDATE_FAIL, e.message);
+      handleErrorResponse(res, e.status || 500, UPDATE_FAIL, e.message);
     }
   }
 });
@@ -80,7 +79,7 @@ TagController.route("/delete/:tagId").delete(
     } catch (e) {
       if (e instanceof Error) {
         // Handle different error scenarios
-        handleErrorResponse(res, res.status, DELETE_FAIL, e.message);
+        handleErrorResponse(res, e.status || 500, DELETE_FAIL, e.message);
       }
     }
   }
@@ -101,7 +100,7 @@ TagController.route("/add/:bookId/tags").patch(
     } catch (e) {
       if (e instanceof Error) {
         // Handle different error scenarios
-        handleErrorResponse(res, res.status || 500, UPDATE_FAIL, e.message);
+        handleErrorResponse(res, e.status || 500, UPDATE_FAIL, e.message);
       }
     }
   }
@@ -125,7 +124,7 @@ TagController.route("/remove/:bookId/tags").patch(
     } catch (e) {
       if (e instanceof Error) {
         // Handle different error scenarios
-        handleErrorResponse(res, res.status || 500, UPDATE_FAIL, e.message);
+        handleErrorResponse(res, e.status || 500, UPDATE_FAIL, e.message);
       }
     }
   }

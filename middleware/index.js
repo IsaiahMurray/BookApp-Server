@@ -3,4 +3,5 @@ module.exports = {
     ValidateAdmin: require('./validateAdmin'),
     Headers: require('./headers'),
     Multer: require('./multerMiddleware'),
+    LoginCheck: require('./loginCheck')
 }

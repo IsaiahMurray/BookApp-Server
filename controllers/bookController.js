@@ -1,6 +1,11 @@
 const { BookService } = require("../services/index");
 const BookController = require("express").Router();
-const { ValidateSession, ValidateAdmin, Multer } = require("../middleware");
+const {
+  ValidateSession,
+  ValidateAdmin,
+  Multer,
+  LoginCheck,
+} = require("../middleware");
 const fs = require("fs");
 const path = require("path");
 const {
@@ -20,6 +25,7 @@ const {
   DELETE_FAIL,
   DELETE_SUCCESS,
   NOT_FOUND,
+  NO_CONTENT,
 } = require("../controllers/constants");
 
 //* Create Book
@@ -40,23 +46,30 @@ BookController.route("/create").post(ValidateSession, async (req, res) => {
   } catch (e) {
     //Handle error
     if (e instanceof Error) {
-      handleErrorResponse(res, res.status || 500, CREATE_FAIL, e.message);
+      handleErrorResponse(res, e.status || 500, CREATE_FAIL, e.message);
     }
   }
 });
 
 //* Get All Books
-BookController.route("/get/all").get(async (req, res) => {
+BookController.route("/get/all").get(LoginCheck, async (req, res) => {
   try {
+    const userId = req.user.id;
     // Call the service function to get all books
-    const allBooks = await BookService.getAllBooks();
+    const allBooks = await BookService.getAllBooks(userId);
+
+    // Check if there are no books found
+    if (!allBooks || allBooks.length === 0) {
+      // If no books found, throw a 404 error
+      handleSuccessResponse(res, 204, NOT_FOUND, NO_CONTENT);
+    }
 
     // Respond with books if found
     handleSuccessResponse(res, 200, allBooks, GET_SUCCESS);
   } catch (e) {
     if (e instanceof Error) {
       // Handle different error scenarios
-      handleErrorResponse(res, res.status || 500, GET_FAIL, e.message);
+        handleErrorResponse(res, e.status || 500, GET_FAIL, e.message);
     }
   }
 });
@@ -78,8 +91,9 @@ BookController.route("/get/books/:userId").get(async (req, res) => {
     // If books are found, send a JSON response with the books
     handleSuccessResponse(res, 200, books, GET_SUCCESS);
   } catch (error) {
-    // Handle any caught errors
-    handleErrorResponse(res, res.status || 500, GET_FAIL, e.message);
+    // Handle different error scenarios
+      handleErrorResponse(res, e.status || 500, GET_FAIL, e.message);
+  
   }
 });
 
@@ -92,7 +106,9 @@ BookController.route("/get/:id").get(async (req, res) => {
     handleSuccessResponse(res, 200, book, GET_SUCCESS);
   } catch (e) {
     if (e instanceof Error) {
-      handleErrorResponse(res, res.status || 500, GET_FAIL, e.message);
+      // Handle different error scenarios
+        handleErrorResponse(res, e.status || 500, GET_FAIL, e.message);
+      
     }
   }
 });
@@ -115,7 +131,8 @@ BookController.route("/get-tags").get(async (req, res) => {
     handleSuccessResponse(res, 200, books, GET_SUCCESS);
   } catch (e) {
     if (e instanceof Error) {
-        handleErrorResponse(res, res.status || 500, GET_FAIL, e.message);
+      // Handle different error scenarios
+        handleErrorResponse(res, e.status || 500, GET_FAIL, e.message);
     }
   }
 });
@@ -123,6 +140,7 @@ BookController.route("/get-tags").get(async (req, res) => {
 //* Update Book
 BookController.route("/update/:bookId").put(
   ValidateSession,
+  ValidateAdmin,
   async (req, res) => {
     try {
       const { bookId } = req.params;
@@ -139,7 +157,7 @@ BookController.route("/update/:bookId").put(
     } catch (e) {
       if (e instanceof Error) {
         // Handle different error scenarios
-        handleErrorResponse(res, res.status || 500, UPDATE_FAIL, e.message);
+          handleErrorResponse(res, e.status || 500, UPDATE_FAIL, e.message);
       }
     }
   }
@@ -148,10 +166,11 @@ BookController.route("/update/:bookId").put(
 //* Patch Book Property
 BookController.route("/patch/:bookId").patch(
   ValidateSession,
+  ValidateAdmin,
   async (req, res) => {
     try {
-      const userId = req.params.id;
-      const bookId = req.params.bookId;
+      const userId = req.user.id;
+      const { bookId } = req.params;
       const { propertyName, propertyValue } = req.body;
 
       // Call the service function to edit the book
@@ -166,7 +185,7 @@ BookController.route("/patch/:bookId").patch(
     } catch (e) {
       if (e instanceof Error) {
         // Handle different error scenarios
-        handleErrorResponse(res, res.status || 500, UPDATE_FAIL, e.message);
+          handleErrorResponse(res, e.status || 500, UPDATE_FAIL, e.message);
       }
     }
   }
@@ -187,8 +206,7 @@ BookController.route("/delete/:bookId").delete(
       handleSuccessResponse(res, 200, deletedBook, DELETE_SUCCESS);
     } catch (e) {
       if (e instanceof Error) {
-        // Handle different error scenarios
-        handleErrorResponse(res, res.status || 500, DELETE_FAIL, e.message);
+          handleErrorResponse(res, e.status || 500, DELETE_FAIL, e.message);
       }
     }
   }
@@ -211,7 +229,7 @@ BookController.route("/upload/cover-picture/:bookId").patch(
       handleSuccessResponse(res, 200, uploadedPic, UPDATE_SUCCESS);
     } catch (e) {
       if (e instanceof Error) {
-        handleErrorResponse(res, res.status || 500, UPDATE_FAIL, e.message);
+        handleErrorResponse(res, e.status || 500, UPDATE_FAIL, e.message);
       }
     }
   }
@@ -248,7 +266,9 @@ BookController.route("/remove/cover-picture/:bookId").patch(
             handleSuccessResponse(res, 200, removedPic, UPDATE_SUCCESS);
           } else {
             // If the profilePicture is not set to null in the model, handle accordingly
-            handleErrorResponse(res, 500, UPDATE_FAIL, e.message);
+            const error = new Error("Could not remove picture.");
+            error.status = 500;
+            throw error;
           }
         } else {
           // If the file in the uploads folder doesn't exist, handle accordingly
@@ -269,7 +289,7 @@ BookController.route("/remove/cover-picture/:bookId").patch(
     } catch (e) {
       // Handle other errors
       if (e instanceof Error) {
-        handleErrorResponse(res, res.status || 500, UPDATE_FAIL, e.message);
+          handleErrorResponse(res, e.status || 500, UPDATE_FAIL, e.message);
       }
     }
   }
