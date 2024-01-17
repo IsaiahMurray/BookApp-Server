@@ -57,6 +57,11 @@ const BookModel = db.define("book", {
     allowNull: true,
     defaultValue: []
   },
+  archive: {
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
+    defaultValue: false
+  }
 });
 
 module.exports = BookModel;
