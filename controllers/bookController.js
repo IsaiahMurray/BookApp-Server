@@ -238,6 +238,7 @@ BookController.route("/upload/cover-picture/:bookId").patch(
 //* Remove Book Cover Picture
 BookController.route("/remove/cover-picture/:bookId").patch(
   ValidateSession,
+  ValidateAdmin,
   async (req, res) => {
     try {
       const { bookId } = req.params;
