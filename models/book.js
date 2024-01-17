@@ -17,22 +17,27 @@ const BookModel = db.define("book", {
   description: {
     type: DataTypes.STRING,
     allowNull: true,
+    defaultValue: ""
   },
   titleFont: {
     type: DataTypes.STRING,
     allowNull: true,
+    defaultValue: "Times New Roman, Arial, sans-serif"
   },
   contentFont: {
     type: DataTypes.STRING,
     allowNull: true,
+    defaultValue: "Times New Roman, Arial, sans-serif"
   },
   privacy: {
     type: DataTypes.ENUM("public", "private", "limited"),
     allowNull: false,
+    defaultValue: "public"
   },
   canRate: {
     type: DataTypes.BOOLEAN,
     allowNull: true,
+    defaultValue: true
   },
   rating: {
     type: DataTypes.DECIMAL,
@@ -46,6 +51,7 @@ const BookModel = db.define("book", {
   canReview: {
     type: DataTypes.BOOLEAN,
     allowNull: false,
+    defaultValue: true
   },
   coverPicture: {
     type: DataTypes.STRING, // Store the path or URL of the profile picture
