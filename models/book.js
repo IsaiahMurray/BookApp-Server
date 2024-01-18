@@ -64,7 +64,7 @@ const BookModel = db.define("book", {
     allowNull: true,
     defaultValue: []
   },
-  archive: {
+  archived: {
     type: DataTypes.BOOLEAN,
     allowNull: false,
     defaultValue: false
