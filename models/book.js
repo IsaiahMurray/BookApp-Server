@@ -56,6 +56,7 @@ const BookModel = db.define("book", {
   coverPicture: {
     type: DataTypes.STRING, // Store the path or URL of the profile picture
     allowNull: true, // Allow the profile picture to be optional
+    // defaultValue: "uploads\bookCover-1705509545472-955003499.avif"
   },
   allowedUsers: {
     // Store the IDs of users who have access to the book with the 'limited' property
