@@ -14,7 +14,6 @@ const {
   DELETE_FAIL,
   DELETE_SUCCESS,
   NOT_FOUND,
-  CONFLICT,
   NO_CONTENT,
 } = require("../controllers/constants");
 
@@ -117,7 +116,7 @@ ChapterController.route("/update/:chapterId").put(async (req, res) => {
     });
 
     // Respond with a success message and the updated chapter
-    handleSuccessResponse(res, 200, updatedChapter, e.message);
+    handleSuccessResponse(res, 200, updatedChapter, UPDATE_SUCCESS);
   } catch (e) {
     if (e instanceof Error) {
       // Handle different error scenarios
@@ -139,7 +138,7 @@ ChapterController.route("/delete/:chapterId").delete(async (req, res) => {
   } catch (e) {
     if (e instanceof Error) {
       // Handle different error scenarios
-      handleErrorResponse(res, e.status || 500, UPDATE_FAIL, e.message);
+      handleErrorResponse(res, e.status || 500, DELETE_FAIL, e.message);
     }
   }
 });

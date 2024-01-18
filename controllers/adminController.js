@@ -83,11 +83,11 @@ AdminController.route("/get/:userId").get(async (req, res) => {
 });
 
 //* Modify role
-AdminController.route("/modify/role/:id").put(async (req, res) => {
+AdminController.route("/update/role/:userId").put(async (req, res) => {
   try {
     const { role } = req.body;
-    const { id } = req.params;
-    const updatedRole = await AdminService.modifyRole(id, role);
+    const { userId } = req.params;
+    const updatedRole = await AdminService.modifyRole(userId, role);
 
     handleSuccessResponse(res, 200, updatedRole, UPDATE_SUCCESS);
   } catch (e) {
@@ -98,10 +98,10 @@ AdminController.route("/modify/role/:id").put(async (req, res) => {
 });
 
 //* Delete User
-AdminController.route("/delete/:id").delete(async (req, res) => {
+AdminController.route("/delete/:userId").delete(async (req, res) => {
   try {
-    const { id } = req.params;
-    const destroyedUser = await AdminService.remove(id);
+    const { userId } = req.params;
+    const destroyedUser = await AdminService.remove(userId);
 
     handleSuccessResponse(res, 200, destroyedUser, DELETE_SUCCESS);
   } catch (e) {

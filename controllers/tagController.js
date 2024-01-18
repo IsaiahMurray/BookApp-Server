@@ -86,7 +86,7 @@ TagController.route("/delete/:tagId").delete(
 );
 
 //* Add Tags to Book
-TagController.route("/add/:bookId/tags").patch(
+TagController.route("/add/:bookId").patch(
   ValidateSession,
   ValidateAdmin,
   async (req, res) => {
@@ -107,7 +107,7 @@ TagController.route("/add/:bookId/tags").patch(
 );
 
 //* Remove Tags from Book
-TagController.route("/remove/:bookId/tags").patch(
+TagController.route("/remove/:bookId").patch(
   ValidateSession,
   ValidateAdmin,
   async (req, res) => {
