@@ -1,5 +1,5 @@
 const { NOT_FOUND } = require("../controllers/constants");
-const { BookModel, TagModel, UserModel, ReviewModel } = require("../models");
+const { BookModel, TagModel, ReviewModel, ChapterModel } = require("../models");
 const { Op } = require("sequelize");
 
 //? Create Book
@@ -22,22 +22,31 @@ const getAllBooks = async (userId) => {
     if (userId && userId !== 0) {
       whereClause = {
         [Op.or]: [
-          { privacy: { [Op.not]: 'private' } }, // Exclude private books
+          { privacy: { [Op.not]: "private" } }, // Exclude private books
           {
-            privacy: 'private',
+            privacy: "private",
             userId: userId, // Include private books if they belong to the logged-in user
           },
         ],
       };
     } else {
       // If no userId, only retrieve public books
-      whereClause = { privacy: 'public' };
+      whereClause = { privacy: "public" };
     }
 
     // Retrieve all books from the database
     const allBooks = await BookModel.findAll({
       where: whereClause,
     });
+    // Fetch chapters for each book
+    const booksWithChapters = await Promise.all(
+      allBooks.map(async (book) => {
+        const chapters = await ChapterModel.findAll({
+          where: { bookId: book.id },
+        });
+        return { ...book.toJSON(), chapters };
+      })
+    );
 
     // Check if there are no books found
     if (!allBooks || allBooks.length === 0) {
@@ -46,20 +55,20 @@ const getAllBooks = async (userId) => {
       error.status = 404;
       throw error;
     }
-    
+
     // If userId is provided and books are set to limited, filter based on allowedUsers
     if (userId) {
-      const filteredBooks = allBooks.filter((book) => {
+      const filteredBooks = booksWithChapters.filter((book) => {
         return (
-          book.privacy !== 'limited' || // Include books with privacy not set to 'limited'
-          (book.privacy === 'limited' && book.allowedUsers.includes(userId))
+          book.privacy !== "limited" || // Include books with privacy not set to 'limited'
+          (book.privacy === "limited" && book.allowedUsers.includes(userId))
         );
       });
 
       return filteredBooks;
     }
 
-    return allBooks;
+    return booksWithChapters;
   } catch (e) {
     throw e;
   }
@@ -75,9 +84,9 @@ const getBooksByUser = async (userId, loggedInUserId) => {
       whereClause = {
         userId,
         [Op.or]: [
-          { privacy: { [Op.not]: 'private' } }, // Exclude private books
+          { privacy: { [Op.not]: "private" } }, // Exclude private books
           {
-            privacy: 'private',
+            privacy: "private",
             userId: loggedInUserId, // Include private books if they belong to the logged-in user
           },
         ],
@@ -101,8 +110,9 @@ const getBooksByUser = async (userId, loggedInUserId) => {
     if (loggedInUserId && loggedInUserId !== userId) {
       const filteredUserBooks = userBooks.filter((book) => {
         return (
-          book.privacy !== 'limited' || // Include books with privacy not set to 'limited'
-          (book.privacy === 'limited' && book.allowedUsers.includes(loggedInUserId))
+          book.privacy !== "limited" || // Include books with privacy not set to 'limited'
+          (book.privacy === "limited" &&
+            book.allowedUsers.includes(loggedInUserId))
         );
       });
 
@@ -123,9 +133,9 @@ const getById = async (id) => {
       include: {
         model: ReviewModel,
         where: {
-          bookId: id
-        }
-      }
+          bookId: id,
+        },
+      },
     });
 
     // Check if the book does not exist

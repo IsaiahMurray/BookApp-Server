@@ -9,9 +9,6 @@ const {
 } = require("../services/helpers/responseHandler");
 
 // Define associations between models
-ReviewModel.belongsTo(UserModel);
-ReviewModel.belongsTo(BookModel);
-
 UserModel.hasMany(ReviewModel);
 BookModel.hasMany(ReviewModel, { foreignKey: "bookId" }); // Ensure 'bookId' matches the foreign key in ReviewModel
 
@@ -25,7 +22,6 @@ BookModel.belongsToMany(TagModel, { through: "BookTags", as: "bookTags" });
 TagModel.belongsToMany(BookModel, { through: "BookTags", as: "tagBooks" });
 
 ChapterModel.belongsTo(UserModel, { foreignKey: "userId", as: "user" }); // New association
-
 
 module.exports = {
   UserModel,
