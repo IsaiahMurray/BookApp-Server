@@ -1,6 +1,7 @@
 const { ReviewService } = require("../services");
 const ReviewController = require("express").Router();
 const { ValidateSession, ValidateAdmin } = require("../middleware");
+const {ReviewModel} = require("../models");
 const {
   CREATE_SUCCESS,
   GET_SUCCESS,
@@ -14,6 +15,16 @@ const {
   NOT_FOUND,
 } = require("./constants");
 const { handleSuccessResponse, handleErrorResponse } = require("../services/helpers/responseHandler");
+
+
+//? Testing Route
+ReviewController.route("/test").get(async(req, res) => {
+  try {
+    
+  } catch (error) {
+    console.log(error);
+  }
+})
 
 //* Create a new review
 ReviewController.route("/create/:bookId").post(

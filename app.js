@@ -2,6 +2,7 @@ require("dotenv").config();
 const helmet = require('helmet');
 
 const Express = require("express");
+const cors = require("cors");
 const app = Express();
 app.use(Express.json());
 
@@ -9,6 +10,7 @@ const dbConnection = require("./db");
 const middlewares = require("./middleware");
 const controllers = require("./controllers");
 
+app.use(cors());
 app.use(helmet());
 app.use("/user", controllers.UserController);
 app.use("/admin", controllers.AdminController);

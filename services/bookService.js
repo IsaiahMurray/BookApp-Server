@@ -1,5 +1,5 @@
 const { NOT_FOUND } = require("../controllers/constants");
-const { BookModel, TagModel, UserModel } = require("../models");
+const { BookModel, TagModel, UserModel, ReviewModel } = require("../models");
 const { Op } = require("sequelize");
 
 //? Create Book
@@ -119,7 +119,14 @@ const getBooksByUser = async (userId, loggedInUserId) => {
 const getById = async (id) => {
   try {
     // Fetch the book by its primary key (ID)
-    const book = await BookModel.findByPk(id);
+    const book = await BookModel.findByPk(id, {
+      include: {
+        model: ReviewModel,
+        where: {
+          bookId: id
+        }
+      }
+    });
 
     // Check if the book does not exist
     if (!book) {

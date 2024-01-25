@@ -1,5 +1,5 @@
 const { DataTypes } = require("sequelize");
-const { ReviewModel } = require("./index");
+const ReviewModel = require("../models/review");
 const db = require("../db");
 
 const BookModel = db.define("book", {
@@ -72,8 +72,25 @@ const BookModel = db.define("book", {
   },
 });
 
-BookModel.prototype.calculateAverageRating = async function () {
-  const reviews = await this.getReviews(); // Assuming you have a getReviews method
+// Define a method to get reviews for a book
+BookModel.prototype.getReviews = async () => {
+  try {
+    const reviews = await ReviewModel.findAll({
+      where: {
+        bookId: 1, // Use the book's id to filter reviews
+      },
+    });
+    return reviews;
+  } catch (error) {
+    console.error("Error fetching reviews:", error);
+    throw error;
+  }
+};
+
+BookModel.prototype.calculateAverageRating = async (id) => {
+  const bookInstance = await BookModel.findByPk(id);
+
+  const reviews = await bookInstance.getReviews(); // Assuming you have a getReviews method
 
   if (reviews && reviews.length > 0) {
     const totalRating = reviews.reduce((sum, review) => sum + review.rating, 0);
@@ -81,16 +98,6 @@ BookModel.prototype.calculateAverageRating = async function () {
   } else {
     return null; // Return null if there are no reviews
   }
-};
-
-BookModel.prototype.getReviews = async function () {
-  const reviews = await ReviewModel.findAll({
-    where: {
-      bookId: this.id, // Assuming 'id' is the primary key of the book
-    },
-  });
-
-  return reviews;
 };
 
 module.exports = BookModel;

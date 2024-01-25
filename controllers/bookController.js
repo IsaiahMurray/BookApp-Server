@@ -12,7 +12,7 @@ const {
   handleErrorResponse,
   handleSuccessResponse,
 } = require("../services/helpers/responseHandler");
-const { BookModel } = require("../models");
+const { BookModel, ReviewModel } = require("../models");
 
 // Constants for error messages or success messages are imported from a separate file
 const {

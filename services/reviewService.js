@@ -1,5 +1,5 @@
 const { NOT_FOUND } = require('../controllers/constants');
-const { ReviewModel, UserModel } = require('../models');
+const { ReviewModel, UserModel, BookModel } = require('../models');
 
 // Create a new review
 const createReview = async (userId, bookId, comment, rating) => {
@@ -10,6 +10,11 @@ const createReview = async (userId, bookId, comment, rating) => {
       comment,
       rating,
     });
+
+    const bookInstance = await BookModel.findByPk(bookId);
+    const avgRating = await bookInstance.calculateAverageRating(bookId);
+    bookInstance.rating = avgRating;
+    bookInstance.save()
 
     return newReview;
   } catch (e) {
