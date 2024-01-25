@@ -1,4 +1,5 @@
 const { DataTypes } = require("sequelize");
+const { ReviewModel } = require("./index");
 const db = require("../db");
 
 const BookModel = db.define("book", {
@@ -17,27 +18,27 @@ const BookModel = db.define("book", {
   description: {
     type: DataTypes.STRING,
     allowNull: true,
-    defaultValue: ""
+    defaultValue: "",
   },
   titleFont: {
     type: DataTypes.STRING,
     allowNull: true,
-    defaultValue: "Times New Roman, Arial, sans-serif"
+    defaultValue: "Times New Roman, Arial, sans-serif",
   },
   contentFont: {
     type: DataTypes.STRING,
     allowNull: true,
-    defaultValue: "Times New Roman, Arial, sans-serif"
+    defaultValue: "Times New Roman, Arial, sans-serif",
   },
   privacy: {
     type: DataTypes.ENUM("public", "private", "limited"),
     allowNull: false,
-    defaultValue: "public"
+    defaultValue: "public",
   },
   canRate: {
     type: DataTypes.BOOLEAN,
     allowNull: true,
-    defaultValue: true
+    defaultValue: true,
   },
   rating: {
     type: DataTypes.DECIMAL,
@@ -51,7 +52,7 @@ const BookModel = db.define("book", {
   canReview: {
     type: DataTypes.BOOLEAN,
     allowNull: false,
-    defaultValue: true
+    defaultValue: true,
   },
   coverPicture: {
     type: DataTypes.STRING, // Store the path or URL of the profile picture
@@ -62,13 +63,34 @@ const BookModel = db.define("book", {
     // Store the IDs of users who have access to the book with the 'limited' property
     type: DataTypes.ARRAY(DataTypes.INTEGER),
     allowNull: true,
-    defaultValue: []
+    defaultValue: [],
   },
   archived: {
     type: DataTypes.BOOLEAN,
     allowNull: false,
-    defaultValue: false
-  }
+    defaultValue: false,
+  },
 });
+
+BookModel.prototype.calculateAverageRating = async function () {
+  const reviews = await this.getReviews(); // Assuming you have a getReviews method
+
+  if (reviews && reviews.length > 0) {
+    const totalRating = reviews.reduce((sum, review) => sum + review.rating, 0);
+    return totalRating / reviews.length;
+  } else {
+    return null; // Return null if there are no reviews
+  }
+};
+
+BookModel.prototype.getReviews = async function () {
+  const reviews = await ReviewModel.findAll({
+    where: {
+      bookId: this.id, // Assuming 'id' is the primary key of the book
+    },
+  });
+
+  return reviews;
+};
 
 module.exports = BookModel;
