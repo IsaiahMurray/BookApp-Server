@@ -96,7 +96,7 @@ BookController.route("/get/books/:userId").get(async (req, res) => {
 
     // If books are found, send a JSON response with the books
     handleSuccessResponse(res, 200, books, GET_SUCCESS);
-  } catch (error) {
+  } catch (e) {
     // Handle different error scenarios
       handleErrorResponse(res, e.status || 500, GET_FAIL, e.message);
   
