@@ -1,6 +1,7 @@
 const { NO_TOKEN, NO_USER, NO_AUTH } = require("../controllers/constants");
 const { JWTService } = require("../services");
 const { UserModel } = require("../models");
+const {handleErrorResponse} = require("../services/helpers/responseHandler")
 
 const ValidateSession = async (req, res, next) => {
   try {
@@ -30,7 +31,7 @@ const ValidateSession = async (req, res, next) => {
     }
   } catch (e) {
     if (e instanceof Error) {
-      handleErrorResponse(res, res.status || 500, NO_AUTH, e.message);
+      handleErrorResponse(res, e.status || 500, NO_AUTH, e.message);
     }
   }
 };

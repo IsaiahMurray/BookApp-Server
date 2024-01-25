@@ -59,30 +59,34 @@ UserController.route("/login").post(async (req, res) => {
 
     if (!email || !password) throw new Error(INCORRECT_EMAIL_PASSWORD);
 
-    const foundUser = await UserService.getByEmail(email);
+    const user = await UserService.getByEmail(email);
 
-    if (!foundUser){
+    if (!user){
       const error = new Error(NO_USER);
       error.status = 404;
       throw error;
     }
-    if (!(await PasswordService.validatePassword(password, foundUser.password))){
+    if (!(await PasswordService.validatePassword(password, user.password))){
       const error = new Error(INCORRECT_EMAIL_PASSWORD);
       error.status = 403;
       throw error;
     }
-    const userId = foundUser?.id;
+    const userId = user?.id;
     const token = await JWTService.createSessionToken(userId);
 
-    res.status(200).json({
-      message: USER_FOUND,
-      user: foundUser,
-      token: token
-    })
-    handleSuccessResponse(res, 200, foundUser, USER_FOUND);
+    handleSuccessResponse(res, 200, {user, token}, USER_FOUND);
   } catch (e) {
     if (e instanceof Error) {
-      handleErrorResponse(res, e.status || 500, TITLE_LOGIN_ERROR, e.message);
+      if(e.status == 404){
+        handleErrorResponse(res, 404, TITLE_LOGIN_ERROR, e.message);
+      }
+      else if(e.status == 403){
+        handleErrorResponse(res, 403, TITLE_LOGIN_ERROR, e.message);
+
+      }
+      else{
+          handleErrorResponse(res, 500, TITLE_LOGIN_ERROR, e.message);
+      }
     }
   }
 });
