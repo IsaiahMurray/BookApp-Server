@@ -19,7 +19,7 @@ const getAllBooks = async (userId) => {
     let whereClause = {};
 
     // If userId is provided, filter books based on privacy and allowedUsers
-    if (userId) {
+    if (userId && userId !== 0) {
       whereClause = {
         [Op.or]: [
           { privacy: { [Op.not]: 'private' } }, // Exclude private books

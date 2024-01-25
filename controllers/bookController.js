@@ -54,7 +54,13 @@ BookController.route("/create").post(ValidateSession, async (req, res) => {
 //* Get All Books
 BookController.route("/get/all").get(LoginCheck, async (req, res) => {
   try {
-    const userId = req.user.id;
+    let userId;
+
+    if(req.user){
+      userId = req.user.id;
+    } else {
+      userId = 0;
+    }
     // Call the service function to get all books
     const allBooks = await BookService.getAllBooks(userId);
 
