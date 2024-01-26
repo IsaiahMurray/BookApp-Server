@@ -13,34 +13,51 @@ UserModel.hasMany(ReviewModel, {
   onDelete: "CASCADE", // Cascade deletion to associated books
   hooks: true, // Enable hooks to trigger before and after changes
 });
+
+UserModel.hasMany(
+  BookModel,
+  {
+    onDelete: "CASCADE",
+    hooks: true,
+  },
+  { foreignKey: "userId" }
+);
+
+BookModel.belongsTo(UserModel, { foreignKey: "userId" });
+
+UserModel.hasMany(
+  ChapterModel,
+  {
+    onDelete: "CASCADE",
+    hooks: true,
+  },
+  { foreignKey: "userId" }
+);
+
+ChapterModel.belongsTo(UserModel, { foreignKey: "userId", as: "user" });
+ChapterModel.belongsTo(BookModel, { foreignKey: "bookId" });
+
+UserModel.hasMany(
+  ReviewModel,
+  {
+    onDelete: "CASCADE",
+    hooks: true,
+  },
+  { foreignKey: "userId" }
+);
+
+ReviewModel.belongsTo(UserModel, { foreignKey: "userId" });
+
 BookModel.hasMany(
   ReviewModel,
   { foreignKey: "bookId" },
   { onDelete: "CASCADE", hooks: true }
 );
 
-ReviewModel.belongsTo(UserModel, { foreignKey: "userId" });
 ReviewModel.belongsTo(BookModel, { foreignKey: "bookId" });
-
-BookModel.belongsTo(
-  UserModel,
-  { foreignKey: "userId" },
-  { onDelete: "CASCADE", hooks: true }
-);
-ChapterModel.belongsTo(
-  BookModel,
-  { foreignKey: "bookId" },
-  { onDelete: "CASCADE", hooks: true }
-);
 
 BookModel.belongsToMany(TagModel, { through: "BookTags", as: "bookTags" });
 TagModel.belongsToMany(BookModel, { through: "BookTags", as: "tagBooks" });
-
-ChapterModel.belongsTo(
-  UserModel,
-  { foreignKey: "userId", as: "user" },
-  { onDelete: "CASCADE", hooks: true }
-);
 
 module.exports = {
   UserModel,
