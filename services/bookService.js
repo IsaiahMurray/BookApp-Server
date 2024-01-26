@@ -166,7 +166,6 @@ const getBooksByTags = async (tags) => {
     });
 
     // Extract tag ids
-
     const tagIds = foundTags.map(tag => {
       return tag.dataValues.id
     })

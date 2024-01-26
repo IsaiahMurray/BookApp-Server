@@ -45,6 +45,7 @@ const modifyRole = async (id, role) => {
       { role: role },
       {
         where: { id: id },
+        returning: true
       }
     );
     return updatedUser;
@@ -59,6 +60,7 @@ const remove = async (id) => {
       where: {
         id: id,
       },
+      returning: true
     });
     return deletedUser;
   } catch (e) {
