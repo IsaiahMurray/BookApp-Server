@@ -122,7 +122,7 @@ BookController.route("/get/:id").get(async (req, res) => {
 BookController.route("/get-tags").get(async (req, res) => {
   try {
     const tags = parseString(req.query.numbers);
-    
+  
     if (!tags || !Array.isArray(tags)) {
       const error = new Error("Tags parameter must be an array");
       error.status = 400;
@@ -136,7 +136,7 @@ BookController.route("/get-tags").get(async (req, res) => {
       error.status = 204;
       throw error
     }
-
+    
     handleSuccessResponse(res, 200, books, GET_SUCCESS);
   } catch (e) {
     if (e instanceof Error) {

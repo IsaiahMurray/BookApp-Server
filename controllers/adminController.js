@@ -53,7 +53,7 @@ AdminController.route("/register").post(async (req, res) => {
 //* Get all Users
 AdminController.route("/get/users").get(async (req, res) => {
   try {
-    const allUsers = await AdminService.getAllUsers(); // Await here
+    const allUsers = await AdminService.getAllUsers();
 
     handleSuccessResponse(res, 200, allUsers, GET_SUCCESS);
   } catch (e) {
@@ -74,7 +74,8 @@ AdminController.route("/get/:userId").get(async (req, res) => {
       error.status = 404;
       throw error;
     }
-    res.json(user);
+    
+    handleSuccessResponse(res, 200, user, GET_SUCCESS);
   } catch (e) {
     if (e instanceof Error) {
       handleErrorResponse(res, e.status || 500, GET_FAIL, e.message);
