@@ -20,6 +20,7 @@ const BAD_REQ = "Bad request.";
 const NO_TOKEN = "No token provided.";
 const FORBIDDEN = "Forbidden.";
 const NO_CONTENT = "No content found for this request";
+const USER_EXISTS = "An account with this email has already been registered. Try logging in.";
 
 module.exports = {
     CREATE_FAIL,
@@ -43,5 +44,6 @@ module.exports = {
     NO_TOKEN,
     NO_USER,
     FORBIDDEN,
-    NO_CONTENT
+    NO_CONTENT,
+    USER_EXISTS
 }

@@ -24,6 +24,7 @@ const {
   USER_FOUND,
   NO_USER,
   NOT_FOUND,
+  USER_EXISTS
 } = require("../controllers/constants");
 
 //* User register
@@ -33,7 +34,13 @@ UserController.route("/register").post(async (req, res) => {
   // Return success message and user ID upon successful registration
   try {
     const { username, email, password } = req.body;
-
+   // Check if a user with the same email already exists
+   const existingUser = await UserService.getByEmail(email);
+   if (existingUser) {
+     const error = new Error(USER_EXISTS);
+     error.status = 400;
+     throw error;
+   }
     const hashedPassword = await PasswordService.hashPassword(password);
     const userId = await UserService.create({
       username,
