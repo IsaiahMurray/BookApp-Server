@@ -23,7 +23,9 @@ const UserModel = db.define("user", {
   },
   readingList: {
     type: DataTypes.ARRAY(DataTypes.INTEGER),
-    allowNull: true
+    allowNull: true,
+    defaultValue: []
+
   },
   favorites: {
     type: DataTypes.ARRAY(DataTypes.INTEGER),
