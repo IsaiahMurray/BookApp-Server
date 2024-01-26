@@ -2,6 +2,7 @@ module.exports = {
     time: require('./timeHelper'),
     validateDate: require('./validateDate'),
     getMissingFields: require('./getMissingFields'),
-    errorHandler: require('./responseHandler')
+    responseHandler: require('./responseHandler'),
+    parseString: require('./parseString')
   };
   
