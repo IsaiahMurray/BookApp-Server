@@ -149,6 +149,7 @@ BookController.route("/update/:bookId").put(
   ValidateAdmin,
   async (req, res) => {
     try {
+      console.log(req.body)
       const { bookId } = req.params;
       const userId = req.user.id;
       const { ...updatedBookData } = req.body;
