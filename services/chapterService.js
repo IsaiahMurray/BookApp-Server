@@ -1,10 +1,16 @@
 const { NOT_FOUND } = require("../controllers/constants");
 const { ChapterModel } = require("../models");
 
-const createChapter = async ({ userId, bookId, title, content, chapterNumber }) => {
+const createChapter = async ({
+  userId,
+  bookId,
+  title,
+  content,
+  chapterNumber,
+}) => {
   try {
     // Replace manual line breaks with '\n' escape sequence
-    const formattedContent = content.replace(/\r?\n|\r/g, '\\n');
+    const formattedContent = content.replace(/\r?\n|\r/g, "\\n");
 
     const newChapter = await ChapterModel.create({
       userId,
@@ -32,22 +38,36 @@ const getChaptersByBookId = async (bookId) => {
   }
 };
 
-const updateChapter = async ({ chapterId, title, content, chapterNumber, userId }) => {
+const updateChapter = async ({
+  chapterId,
+  title,
+  content,
+  chapterNumber,
+  userId,
+}) => {
   try {
-      // Replace manual line breaks with '\n' escape sequence
-      const formattedContent = content.replace(/\r?\n|\r/g, '\\n');
+    // Replace manual line breaks with '\n' escape sequence
+    const formattedContent = content.replace(/\r?\n|\r/g, "\\n");
 
-      // Update the chapter with the formatted content
-      const updatedChapter = await existingChapter.update({
-          title,
-          content: formattedContent,
-          chapterNumber,
-          userId
-      });
-      
-      return updatedChapter;
+    // Update the chapter with the formatted content
+    const updatedChapter = await ChapterModel.update(
+      {
+        title,
+        content: formattedContent,
+        chapterNumber,
+      },
+      {
+        where: {
+          id: chapterId,
+          userId,
+        },
+        returning: true,
+      }
+    );
+
+    return updatedChapter;
   } catch (error) {
-      throw error;
+    throw error;
   }
 };
 
@@ -65,7 +85,7 @@ const deleteChapter = async (chapterId) => {
     }
 
     // If the chapter exists, delete it from the database
-    await deletedChapter.destroy();
+    await deletedChapter.destroy({ returning: true });
 
     // Return the deleted chapter object after successful deletion
     return deletedChapter;
@@ -74,7 +94,6 @@ const deleteChapter = async (chapterId) => {
     throw error;
   }
 };
-
 
 module.exports = {
   createChapter,
