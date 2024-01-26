@@ -156,33 +156,31 @@ const getById = async (id) => {
 //? Get books by tags
 const getBooksByTags = async (tags) => {
   try {
-    // Find tags with the given names
+    // Find tags with the given IDs
     const foundTags = await TagModel.findAll({
       where: {
-        tagName: {
+        id: {
           [Op.in]: tags,
         },
       },
     });
 
     // Extract tag ids
-    const tagIds = foundTags.map((tag) => tag.id);
+
+    const tagIds = foundTags.map(tag => {
+      return tag.dataValues.id
+    })
 
     // Find books with the extracted tag ids
     const books = await BookModel.findAll({
-      include: [
-        {
-          model: TagModel,
-          as: "bookTags",
-          where: {
-            id: {
-              [Op.in]: tagIds,
-            },
-          },
+      where: {
+        tags: {
+          [Op.contains]: tagIds,
         },
-      ],
+      },
     });
 
+console.log(books)
     return books;
   } catch (e) {
     throw e;

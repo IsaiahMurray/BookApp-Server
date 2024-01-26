@@ -13,6 +13,7 @@ const {
   handleSuccessResponse,
 } = require("../services/helpers/responseHandler");
 const { BookModel, ReviewModel } = require("../models");
+const { parseString } = require("../services/helpers/index");
 
 // Constants for error messages or success messages are imported from a separate file
 const {
@@ -56,7 +57,7 @@ BookController.route("/get/all").get(LoginCheck, async (req, res) => {
   try {
     let userId;
 
-    if(req.user){
+    if (req.user) {
       userId = req.user.id;
     } else {
       userId = 0;
@@ -75,7 +76,7 @@ BookController.route("/get/all").get(LoginCheck, async (req, res) => {
   } catch (e) {
     if (e instanceof Error) {
       // Handle different error scenarios
-        handleErrorResponse(res, e.status || 500, GET_FAIL, e.message);
+      handleErrorResponse(res, e.status || 500, GET_FAIL, e.message);
     }
   }
 });
@@ -98,8 +99,7 @@ BookController.route("/get/books/:userId").get(async (req, res) => {
     handleSuccessResponse(res, 200, books, GET_SUCCESS);
   } catch (e) {
     // Handle different error scenarios
-      handleErrorResponse(res, e.status || 500, GET_FAIL, e.message);
-  
+    handleErrorResponse(res, e.status || 500, GET_FAIL, e.message);
   }
 });
 
@@ -113,8 +113,7 @@ BookController.route("/get/:id").get(async (req, res) => {
   } catch (e) {
     if (e instanceof Error) {
       // Handle different error scenarios
-        handleErrorResponse(res, e.status || 500, GET_FAIL, e.message);
-      
+      handleErrorResponse(res, e.status || 500, GET_FAIL, e.message);
     }
   }
 });
@@ -122,23 +121,27 @@ BookController.route("/get/:id").get(async (req, res) => {
 //* Get Books by tags
 BookController.route("/get-tags").get(async (req, res) => {
   try {
-    const { tags } = req.query;
-
+    const tags = parseString(req.query.numbers);
+    
     if (!tags || !Array.isArray(tags)) {
       const error = new Error("Tags parameter must be an array");
       error.status = 400;
+      throw error;
     }
 
     const books = await BookService.getBooksByTags(tags);
-
-    if (books.length == 0) {
-      handleSuccessResponse(res, 204, books, NO_CONTENT);
+   
+    if (!books || books.length == 0) {
+      const error = new Error(NO_CONTENT);
+      error.status = 204;
+      throw error
     }
+
     handleSuccessResponse(res, 200, books, GET_SUCCESS);
   } catch (e) {
     if (e instanceof Error) {
       // Handle different error scenarios
-        handleErrorResponse(res, e.status || 500, GET_FAIL, e.message);
+      handleErrorResponse(res, e.status || 500, GET_FAIL, e.message);
     }
   }
 });
@@ -149,7 +152,7 @@ BookController.route("/update/:bookId").put(
   ValidateAdmin,
   async (req, res) => {
     try {
-      console.log(req.body)
+      console.log(req.body);
       const { bookId } = req.params;
       const userId = req.user.id;
       const { ...updatedBookData } = req.body;
@@ -164,7 +167,7 @@ BookController.route("/update/:bookId").put(
     } catch (e) {
       if (e instanceof Error) {
         // Handle different error scenarios
-          handleErrorResponse(res, e.status || 500, UPDATE_FAIL, e.message);
+        handleErrorResponse(res, e.status || 500, UPDATE_FAIL, e.message);
       }
     }
   }
@@ -192,7 +195,7 @@ BookController.route("/patch/:bookId").patch(
     } catch (e) {
       if (e instanceof Error) {
         // Handle different error scenarios
-          handleErrorResponse(res, e.status || 500, UPDATE_FAIL, e.message);
+        handleErrorResponse(res, e.status || 500, UPDATE_FAIL, e.message);
       }
     }
   }
@@ -213,7 +216,7 @@ BookController.route("/delete/:bookId").delete(
       handleSuccessResponse(res, 200, deletedBook, DELETE_SUCCESS);
     } catch (e) {
       if (e instanceof Error) {
-          handleErrorResponse(res, e.status || 500, DELETE_FAIL, e.message);
+        handleErrorResponse(res, e.status || 500, DELETE_FAIL, e.message);
       }
     }
   }
@@ -297,7 +300,7 @@ BookController.route("/remove/cover-picture/:bookId").patch(
     } catch (e) {
       // Handle other errors
       if (e instanceof Error) {
-          handleErrorResponse(res, e.status || 500, UPDATE_FAIL, e.message);
+        handleErrorResponse(res, e.status || 500, UPDATE_FAIL, e.message);
       }
     }
   }
